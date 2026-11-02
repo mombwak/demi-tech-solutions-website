@@ -20,13 +20,13 @@ export const COMPANY_INFO = {
   phoneRaw: '254703293201',
   email: 'info@demitechsolutions.com',
   website: 'www.demitechsolutions.com',
+  whatsappPrefilledMessage: 'Hello Demi Tech Solutions, I would like to enquire about booking a professional consultation.',
   whatsappUrl:
-    'https://wa.me/254703293201?text=Hello%20Demi%20Tech%20Solutions%2C%20I%20would%20like%20to%20enquire%20about%20a%20technology%20engineering%20consultation.',
+    'https://wa.me/254703293201?text=Hello%20Demi%20Tech%20Solutions%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20professional%20consultation.',
   consultationFeeRemote: 2500,
   consultationFeeLocal: 5000,
   consultationFeeRegional: 8500,
-  mpesaPaybillNumber: '522522', // Configurable administrative default
-  mpesaAccountNumber: '1290458', // Configurable administrative reference
+  mpesaTillNumber: '5829259',
 };
 
 export const CORE_DIVISIONS: SolutionDivision[] = [

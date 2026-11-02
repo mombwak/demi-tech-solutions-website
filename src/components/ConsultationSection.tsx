@@ -157,16 +157,35 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({
               </div>
             </div>
 
-            {/* M-Pesa Instructions Briefing */}
-            <div className="p-4 bg-neutral-100 border border-neutral-300 text-xs text-neutral-700 mb-8 space-y-1 font-mono">
-              <div className="font-bold text-black flex items-center gap-1.5 font-sans mb-1">
-                <CreditCard className="w-3.5 h-3.5" />
-                <span>M-Pesa Payment Instructions:</span>
+            {/* M-Pesa Buy Goods Instructions Briefing */}
+            <div className="p-5 bg-neutral-100 border border-neutral-300 text-xs text-neutral-800 mb-8">
+              <div className="font-bold text-black flex items-center gap-1.5 font-sans mb-2 text-sm">
+                <CreditCard className="w-4 h-4 text-black" />
+                <span>Payment Method: M-Pesa Buy Goods</span>
               </div>
-              <div>Paybill: <strong className="text-black">{settings.mpesaPaybill}</strong></div>
-              <div>Account: <strong className="text-black">{settings.mpesaAccount}</strong></div>
-              <div className="text-[11px] text-neutral-500 pt-1">
-                Fee is fully credited towards your project implementation upon commissioning.
+
+              <div className="p-3 bg-white border border-neutral-300 mb-3 text-center">
+                <div className="text-[11px] font-mono text-neutral-500 uppercase tracking-wider">
+                  M-Pesa Buy Goods Till Number
+                </div>
+                <div className="text-2xl font-mono font-extrabold text-black tracking-wider my-0.5">
+                  5829259
+                </div>
+                <div className="text-xs font-semibold text-black">
+                  Pay via M-Pesa Buy Goods Till Number: 5829259.
+                </div>
+              </div>
+
+              <ol className="list-decimal list-inside space-y-1 text-xs text-neutral-700 font-medium">
+                <li>Select Lipa na M-Pesa.</li>
+                <li>Select Buy Goods and Services.</li>
+                <li>Enter Till Number: <strong className="text-black font-bold font-mono">5829259</strong>.</li>
+                <li>Enter the consultation amount.</li>
+                <li>Confirm payment using your M-Pesa PIN.</li>
+              </ol>
+
+              <div className="text-[11px] text-neutral-500 pt-3 border-t border-neutral-200 mt-3">
+                Instant STK Push online prompt and manual Buy Goods options are available when booking.
               </div>
             </div>
 

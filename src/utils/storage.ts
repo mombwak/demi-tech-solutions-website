@@ -14,16 +14,14 @@ export interface AdminSettings {
   consultationFeeRemote: number;
   consultationFeeLocal: number;
   consultationFeeRegional: number;
-  mpesaPaybill: string;
-  mpesaAccount: string;
+  mpesaTill: string;
 }
 
 const DEFAULT_SETTINGS: AdminSettings = {
   consultationFeeRemote: COMPANY_INFO.consultationFeeRemote,
   consultationFeeLocal: COMPANY_INFO.consultationFeeLocal,
   consultationFeeRegional: COMPANY_INFO.consultationFeeRegional,
-  mpesaPaybill: COMPANY_INFO.mpesaPaybillNumber,
-  mpesaAccount: COMPANY_INFO.mpesaAccountNumber,
+  mpesaTill: COMPANY_INFO.mpesaTillNumber,
 };
 
 const SEED_APPLICATIONS: TechnicianApplication[] = [

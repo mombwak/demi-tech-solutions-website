@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { X, CheckCircle2, ArrowRight, ShieldCheck, Copy, Check } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, CheckCircle2, ArrowRight, ShieldCheck, Copy, Check, Smartphone, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
 import { getAdminSettings, saveConsultation } from '../utils/storage.ts';
 import { ConsultationBooking } from '../types.ts';
 import { KENYA_COUNTIES, COMPANY_INFO } from '../data/content.ts';
@@ -13,6 +13,9 @@ interface ConsultationModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+type PaymentMode = 'stk' | 'manual';
+type StkStatus = 'idle' | 'initiating' | 'pending_pin' | 'success' | 'cancelled' | 'failed' | 'unconfigured';
 
 export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   isOpen,
@@ -31,10 +34,37 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   const [consultationMethod, setConsultationMethod] = useState<
     'Remote Consultation' | 'On-site Consultation (Kisumu & Western Kenya)'
   >('Remote Consultation');
+
+  // Payment states
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>('stk');
+  const [stkPhone, setStkPhone] = useState('');
+  const [stkStatus, setStkStatus] = useState<StkStatus>('idle');
+  const [stkMessage, setStkMessage] = useState('');
+  const [stkErrorDetails, setStkErrorDetails] = useState('');
+  const [checkoutRequestId, setCheckoutRequestId] = useState('');
   const [mpesaCode, setMpesaCode] = useState('');
+  const [copiedTill, setCopiedTill] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [confirmedBooking, setConfirmedBooking] = useState<ConsultationBooking | null>(null);
-  const [copiedPaybill, setCopiedPaybill] = useState(false);
+
+  const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pollAttemptsRef = useRef(0);
+
+  // Sync STK phone with contact phone initially
+  useEffect(() => {
+    if (phoneNumber && !stkPhone) {
+      setStkPhone(phoneNumber);
+    }
+  }, [phoneNumber, stkPhone]);
+
+  // Clean up polling interval
+  useEffect(() => {
+    return () => {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+      }
+    };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -45,15 +75,144 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
       ? settings.consultationFeeLocal
       : settings.consultationFeeRegional;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg('');
+  const tillNumber = settings.mpesaTill || COMPANY_INFO.mpesaTillNumber;
 
+  const copyTillNumber = () => {
+    navigator.clipboard.writeText(tillNumber);
+    setCopiedTill(true);
+    setTimeout(() => setCopiedTill(false), 2500);
+  };
+
+  // Helper to validate common form inputs
+  const validateFormFields = (): boolean => {
     if (!fullName.trim() || !phoneNumber.trim() || !email.trim() || !town.trim() || !projectDescription.trim()) {
       setErrorMsg('Please complete all required fields (Name, Phone, Email, Town, Project Scope).');
+      return false;
+    }
+    return true;
+  };
+
+  // ---------------------------------------------------------------------------
+  // M-PESA STK PUSH FLOW
+  // ---------------------------------------------------------------------------
+  const handleInitiateStkPush = async () => {
+    setErrorMsg('');
+    if (!validateFormFields()) return;
+
+    const phoneToCharge = stkPhone.trim() || phoneNumber.trim();
+    if (!phoneToCharge) {
+      setErrorMsg('Please enter an M-Pesa registered phone number to receive the payment prompt.');
       return;
     }
 
+    setStkStatus('initiating');
+    setStkMessage('Connecting to Safaricom Daraja Gateway...');
+    setStkErrorDetails('');
+
+    try {
+      const response = await fetch('/api/mpesa/stkpush', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber: phoneToCharge,
+          amount: currentFee,
+          accountReference: `CONS-${Date.now().toString().slice(-4)}`,
+          transactionDesc: 'Consultation',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 503 || data.configured === false) {
+        // Daraja credentials not configured on server
+        setStkStatus('unconfigured');
+        setStkMessage(data.error || 'Safaricom Daraja API credentials are not configured on this server.');
+        setStkErrorDetails(data.details || 'Please configure MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_PASSKEY, and MPESA_SHORTCODE in environment variables.');
+        return;
+      }
+
+      if (response.ok && data.success) {
+        setStkStatus('pending_pin');
+        setCheckoutRequestId(data.checkoutRequestId);
+        setStkMessage(data.customerMessage || `Payment prompt sent to ${phoneToCharge}. Please enter your M-Pesa PIN on your phone.`);
+        startPollingStatus(data.checkoutRequestId, phoneToCharge);
+      } else {
+        setStkStatus('failed');
+        setStkMessage(data.error || 'Failed to initiate M-Pesa STK Push.');
+        setStkErrorDetails(typeof data.details === 'string' ? data.details : JSON.stringify(data.details || ''));
+      }
+    } catch (err: any) {
+      setStkStatus('failed');
+      setStkMessage('Network connection to M-Pesa gateway could not be established.');
+      setStkErrorDetails(err.message || '');
+    }
+  };
+
+  // Poll transaction verification endpoint
+  const startPollingStatus = (reqId: string, phoneCharged: string) => {
+    if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    pollAttemptsRef.current = 0;
+
+    pollTimerRef.current = setInterval(async () => {
+      pollAttemptsRef.current += 1;
+
+      try {
+        const res = await fetch(`/api/mpesa/status/${reqId}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        if (data.status === 'SUCCESS') {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          setStkStatus('success');
+          setStkMessage(`Payment verified successfully! Safaricom Receipt: ${data.mpesaReceiptNumber || 'Verified'}`);
+
+          // Finalize consultation booking
+          finalizeBooking({
+            receiptCode: data.mpesaReceiptNumber || `MPESA-${Date.now().toString().slice(-6)}`,
+            status: 'Confirmed',
+          });
+        } else if (data.status === 'CANCELLED') {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          setStkStatus('cancelled');
+          setStkMessage('The payment request was cancelled on your phone.');
+        } else if (data.status === 'FAILED') {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          setStkStatus('failed');
+          setStkMessage(data.resultDesc || 'Payment failed or timed out.');
+        }
+      } catch (err) {
+        // Continue polling until max attempts
+      }
+
+      // Timeout after 60 seconds (24 attempts x 2.5s)
+      if (pollAttemptsRef.current >= 24) {
+        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+        if (stkStatus === 'pending_pin') {
+          setStkStatus('failed');
+          setStkMessage('Payment verification timed out. If you entered your PIN, please enter your M-Pesa receipt code below.');
+        }
+      }
+    }, 2500);
+  };
+
+  // ---------------------------------------------------------------------------
+  // MANUAL BUY GOODS SUBMIT FLOW
+  // ---------------------------------------------------------------------------
+  const handleManualSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    if (!validateFormFields()) return;
+
+    finalizeBooking({
+      receiptCode: mpesaCode.trim().toUpperCase() || 'PAYMENT_PENDING_CONFIRMATION',
+      status: mpesaCode.trim() ? 'Confirmed' : 'Pending Review',
+    });
+  };
+
+  const finalizeBooking = (paymentInfo: { receiptCode: string; status: 'Confirmed' | 'Pending Review' }) => {
     const bookingId = `CONS-${Date.now().toString().slice(-6)}`;
     const now = new Date();
     const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
@@ -72,18 +231,12 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
       projectDescription: projectDescription.trim(),
       consultationMethod,
       consultationFee: currentFee,
-      mpesaCode: mpesaCode.trim().toUpperCase() || 'PAYMENT_PENDING_CONFIRMATION',
-      status: mpesaCode.trim() ? 'Confirmed' : 'Pending Review',
+      mpesaCode: paymentInfo.receiptCode,
+      status: paymentInfo.status,
     };
 
     saveConsultation(newBooking);
     setConfirmedBooking(newBooking);
-  };
-
-  const copyPaybillInfo = () => {
-    navigator.clipboard.writeText(`Paybill: ${settings.mpesaPaybill}, Account: ${settings.mpesaAccount}`);
-    setCopiedPaybill(true);
-    setTimeout(() => setCopiedPaybill(false), 2500);
   };
 
   return (
@@ -151,9 +304,9 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
               </div>
             </div>
 
-            <p className="text-xs text-neutral-600 leading-relaxed">
+            <div className="p-4 bg-neutral-100 text-xs text-neutral-800 leading-relaxed">
               Our lead systems engineer will contact you at <strong>{confirmedBooking.phoneNumber}</strong> within business hours to confirm your calendar slot and finalize preliminary documentation.
-            </p>
+            </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
               <a
@@ -168,20 +321,22 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
               </a>
               <button
                 onClick={onClose}
-                className="w-full sm:w-auto px-6 py-3 text-xs font-semibold text-neutral-600 border border-neutral-300 hover:bg-neutral-100"
+                className="w-full sm:w-auto px-6 py-3 text-xs font-semibold text-neutral-600 border border-neutral-300 hover:bg-neutral-100 cursor-pointer"
               >
                 Close
               </button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-5 max-h-[75vh] overflow-y-auto">
+          <div className="p-6 sm:p-8 space-y-5 max-h-[75vh] overflow-y-auto">
             {errorMsg && (
-              <div className="p-3 bg-neutral-100 border border-neutral-300 text-xs text-black font-semibold">
-                {errorMsg}
+              <div className="p-3 bg-neutral-100 border border-neutral-300 text-xs text-black font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-black shrink-0" />
+                <span>{errorMsg}</span>
               </div>
             )}
 
+            {/* Basic Information */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-black mb-1">
@@ -214,12 +369,12 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-black mb-1">
-                  Phone Number (Active for WhatsApp/Calls) *
+                  Contact Phone Number *
                 </label>
                 <input
                   type="tel"
                   required
-                  placeholder="e.g. +254 712 345678"
+                  placeholder="e.g. 0712345678 or +254 712 345678"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   className="w-full px-3 py-2 text-xs border border-neutral-300 bg-white focus:border-black focus:outline-none"
@@ -297,8 +452,8 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
               </label>
               <textarea
                 required
-                rows={3}
-                placeholder="Describe your property size, number of camera points, current pain points, existing equipment or timeline..."
+                rows={2}
+                placeholder="Describe your site size, number of camera points, current pain points, existing equipment or timeline..."
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-neutral-300 bg-white focus:border-black focus:outline-none"
@@ -351,60 +506,236 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     <span className="text-xs font-bold text-black">On-Site Technical Survey</span>
                   </div>
                   <div className="text-[11px] text-neutral-600 mt-1">
-                    {county === 'Kisumu' ? `Kisumu: KES ${settings.consultationFeeLocal.toLocaleString()}` : `Regional: KES ${settings.consultationFeeRegional.toLocaleString()}`}
+                    {county === 'Kisumu'
+                      ? `Kisumu: KES ${settings.consultationFeeLocal.toLocaleString()}`
+                      : `Regional: KES ${settings.consultationFeeRegional.toLocaleString()}`}
                   </div>
                 </label>
               </div>
             </div>
 
-            {/* M-Pesa Instructions Box */}
-            <div className="p-4 bg-neutral-50 border border-neutral-300 text-xs text-neutral-700">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-bold text-black">M-Pesa Consultation Fee Instructions:</span>
-                <button
-                  type="button"
-                  onClick={copyPaybillInfo}
-                  className="text-[11px] font-mono text-black underline flex items-center gap-1 cursor-pointer"
-                >
-                  {copiedPaybill ? <Check className="w-3 h-3 text-black" /> : <Copy className="w-3 h-3" />}
-                  <span>{copiedPaybill ? 'Copied' : 'Copy Paybill'}</span>
-                </button>
+            {/* ------------------------------------------------------------- */}
+            {/* M-PESA PAYMENT SELECTION: STK PUSH OR BUY GOODS TILL 5829259  */}
+            {/* ------------------------------------------------------------- */}
+            <div className="border border-neutral-300 bg-neutral-50 p-4 sm:p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-200 pb-3">
+                <div className="font-bold text-black text-sm">
+                  Consultation Fee: <span className="font-mono text-base">KES {currentFee.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-1 p-1 bg-neutral-200 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMode('stk');
+                      setErrorMsg('');
+                    }}
+                    className={`px-3 py-1 font-bold text-xs transition-colors cursor-pointer ${
+                      paymentMode === 'stk' ? 'bg-black text-white shadow-sm' : 'text-neutral-700 hover:text-black'
+                    }`}
+                  >
+                    M-Pesa STK Push
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMode('manual');
+                      setErrorMsg('');
+                    }}
+                    className={`px-3 py-1 font-bold text-xs transition-colors cursor-pointer ${
+                      paymentMode === 'manual' ? 'bg-black text-white shadow-sm' : 'text-neutral-700 hover:text-black'
+                    }`}
+                  >
+                    Manual Buy Goods
+                  </button>
+                </div>
               </div>
 
-              <div className="font-mono text-neutral-800 space-y-0.5">
-                <div>1. Go to M-Pesa &gt; Lipa na M-Pesa &gt; Paybill</div>
-                <div>2. Business Number: <strong>{settings.mpesaPaybill}</strong></div>
-                <div>3. Account Number: <strong>{settings.mpesaAccount}</strong></div>
-                <div>4. Amount: <strong>KES {currentFee.toLocaleString()}</strong></div>
-              </div>
+              {/* PAYMENT OPTION 1: STK PUSH (Lipa na M-Pesa Online) */}
+              {paymentMode === 'stk' && (
+                <div className="space-y-4">
+                  <div className="text-xs text-neutral-700 leading-relaxed">
+                    Receive an instant Lipa na M-Pesa payment prompt on your mobile phone to complete payment.
+                  </div>
 
-              <div className="mt-3 pt-2 border-t border-neutral-200">
-                <label className="block text-[11px] font-bold text-neutral-800 mb-1">
-                  Enter M-Pesa Transaction Confirmation Code (optional at submission):
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. SK98MX42LQ"
-                  value={mpesaCode}
-                  onChange={(e) => setMpesaCode(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs font-mono uppercase border border-neutral-300 bg-white focus:border-black focus:outline-none"
-                />
-                <span className="text-[10px] text-neutral-500 mt-0.5 block">
-                  You can also submit now and confirm transaction details with our dispatch coordinator.
-                </span>
+                  <div>
+                    <label className="block text-xs font-bold text-black mb-1">
+                      M-Pesa Registered Phone Number *
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="tel"
+                        placeholder="e.g. 0712345678 or 254712345678"
+                        value={stkPhone}
+                        onChange={(e) => setStkPhone(e.target.value)}
+                        disabled={stkStatus === 'initiating' || stkStatus === 'pending_pin'}
+                        className="flex-1 px-3 py-2 text-xs font-mono border border-neutral-300 bg-white focus:border-black focus:outline-none disabled:bg-neutral-100"
+                      />
+                    </div>
+                    <span className="text-[11px] text-neutral-500 mt-1 block">
+                      Confirm the phone number to receive the prompt.
+                    </span>
+                  </div>
+
+                  {/* STK Status Feedback Cards */}
+                  {stkStatus === 'initiating' && (
+                    <div className="p-4 bg-white border border-neutral-300 flex items-center gap-3 text-xs text-neutral-800">
+                      <Loader2 className="w-5 h-5 text-black animate-spin shrink-0" />
+                      <div>
+                        <div className="font-bold">Initiating STK Push...</div>
+                        <div className="text-neutral-600 text-[11px]">{stkMessage}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {stkStatus === 'pending_pin' && (
+                    <div className="p-4 bg-white border-2 border-black flex items-start gap-3 text-xs text-neutral-800">
+                      <Smartphone className="w-5 h-5 text-black shrink-0 mt-0.5 animate-pulse" />
+                      <div className="flex-1">
+                        <div className="font-extrabold text-black text-sm mb-1">
+                          Payment Prompt Sent to Your Phone
+                        </div>
+                        <div className="text-neutral-700 leading-relaxed mb-2 font-medium">
+                          Please unlock your phone ({stkPhone || phoneNumber}) and enter your M-Pesa PIN to authorize <strong>KES {currentFee.toLocaleString()}</strong>.
+                        </div>
+                        <div className="text-[11px] font-mono text-neutral-500 flex items-center gap-1.5">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Waiting for PIN verification from Safaricom...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {stkStatus === 'cancelled' && (
+                    <div className="p-4 bg-neutral-100 border border-neutral-300 text-xs text-neutral-800 space-y-2">
+                      <div className="font-bold text-black flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 text-black" />
+                        <span>Payment Cancelled on Phone</span>
+                      </div>
+                      <p className="text-neutral-600 leading-relaxed">
+                        {stkMessage} You can click &quot;PAY WITH M-PESA&quot; to try again, or switch to the manual Buy Goods Till option below.
+                      </p>
+                    </div>
+                  )}
+
+                  {stkStatus === 'failed' && (
+                    <div className="p-4 bg-neutral-100 border border-neutral-300 text-xs text-neutral-800 space-y-2">
+                      <div className="font-bold text-black flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 text-black" />
+                        <span>Transaction Not Completed</span>
+                      </div>
+                      <p className="text-neutral-600 leading-relaxed">{stkMessage}</p>
+                      {stkErrorDetails && (
+                        <div className="text-[11px] font-mono text-neutral-500 bg-white p-2 border border-neutral-200">
+                          {stkErrorDetails}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {stkStatus === 'unconfigured' && (
+                    <div className="p-4 bg-white border border-neutral-400 text-xs text-neutral-800 space-y-2.5">
+                      <div className="font-bold text-black flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 text-black" />
+                        <span>Daraja Gateway Configuration Required</span>
+                      </div>
+                      <p className="text-neutral-600 leading-relaxed text-[11px]">
+                        {stkMessage}
+                      </p>
+                      <div className="text-[11px] font-mono text-neutral-600 bg-neutral-100 p-2.5 border border-neutral-200">
+                        {stkErrorDetails}
+                      </div>
+                      <p className="text-neutral-700 font-semibold text-xs pt-1">
+                        Please complete your payment using the manual Buy Goods Till Number below:
+                      </p>
+                    </div>
+                  )}
+
+                  {/* STK Trigger Action Button */}
+                  {stkStatus !== 'pending_pin' && (
+                    <button
+                      type="button"
+                      onClick={handleInitiateStkPush}
+                      className="w-full py-4 text-xs font-extrabold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                    >
+                      <Smartphone className="w-4 h-4" />
+                      <span>PAY WITH M-PESA (KES {currentFee.toLocaleString()})</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* ------------------------------------------------------------- */}
+              {/* PAYMENT OPTION 2: MANUAL BUY GOODS TILL NUMBER: 5829259        */}
+              {/* ALWAYS DISPLAYED (OR AS ACTIVE TAB) AS REQUIRED               */}
+              {/* ------------------------------------------------------------- */}
+              <div className="pt-3 border-t border-neutral-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-black text-xs uppercase tracking-wide">
+                    Payment Method: M-Pesa Buy Goods
+                  </div>
+                  <button
+                    type="button"
+                    onClick={copyTillNumber}
+                    className="text-[11px] font-mono text-black underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedTill ? <Check className="w-3 h-3 text-black" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedTill ? 'Till Copied' : 'Copy Till'}</span>
+                  </button>
+                </div>
+
+                {/* Prominent Till Number Display */}
+                <div className="p-3.5 bg-white border-2 border-black text-center">
+                  <div className="text-[11px] font-mono text-neutral-500 uppercase tracking-widest">
+                    M-Pesa Buy Goods &amp; Services
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-mono font-extrabold text-black tracking-wider my-1">
+                    {tillNumber}
+                  </div>
+                  <div className="text-xs font-bold text-black">
+                    Pay via M-Pesa Buy Goods Till Number: {tillNumber}.
+                  </div>
+                </div>
+
+                {/* Exact Required 5 Steps */}
+                <ol className="list-decimal list-inside space-y-1 text-xs text-neutral-700 font-medium bg-white p-3 border border-neutral-200">
+                  <li>Select Lipa na M-Pesa.</li>
+                  <li>Select Buy Goods and Services.</li>
+                  <li>Enter Till Number: <strong className="text-black font-bold font-mono">{tillNumber}</strong>.</li>
+                  <li>Enter the consultation amount (<strong>KES {currentFee.toLocaleString()}</strong>).</li>
+                  <li>Confirm payment using your M-Pesa PIN.</li>
+                </ol>
+
+                {/* Manual Code Input & Confirmation Submit */}
+                {(paymentMode === 'manual' || stkStatus === 'unconfigured' || stkStatus === 'failed') && (
+                  <form onSubmit={handleManualSubmit} className="space-y-3 pt-2">
+                    <div>
+                      <label className="block text-xs font-bold text-black mb-1">
+                        Enter M-Pesa Transaction Confirmation Code:
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. SK98MX42LQ"
+                        value={mpesaCode}
+                        onChange={(e) => setMpesaCode(e.target.value)}
+                        className="w-full px-3 py-2 text-xs font-mono uppercase border border-neutral-300 bg-white focus:border-black focus:outline-none"
+                      />
+                      <span className="text-[11px] text-neutral-500 mt-0.5 block">
+                        Enter the 10-character code from your Safaricom M-Pesa confirmation SMS.
+                      </span>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full py-4 text-xs font-bold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                    >
+                      <span>CONFIRM &amp; BOOK CONSULTATION (KES {currentFee.toLocaleString()})</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="w-full py-4 text-xs font-bold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-              >
-                <span>CONFIRM & BOOK CONSULTATION (KES {currentFee.toLocaleString()})</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </form>
+          </div>
         )}
       </div>
     </div>
