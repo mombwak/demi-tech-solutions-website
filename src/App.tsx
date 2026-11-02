@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { PageView } from './types.ts';
 import { Header } from './components/Header.tsx';
 import { Hero } from './components/Hero.tsx';
@@ -12,16 +12,24 @@ import { CoreSolutions } from './components/CoreSolutions.tsx';
 import { WhyUs } from './components/WhyUs.tsx';
 import { ProjectsPortfolio } from './components/ProjectsPortfolio.tsx';
 import { ConsultationSection } from './components/ConsultationSection.tsx';
-import { ConsultationModal } from './components/ConsultationModal.tsx';
 import { TechnicianNetworkSection } from './components/TechnicianNetworkSection.tsx';
-import { TechnicianApplicationModal } from './components/TechnicianApplicationModal.tsx';
 import { IndustriesSection } from './components/IndustriesSection.tsx';
 import { AboutSection } from './components/AboutSection.tsx';
 import { InsightsSection } from './components/InsightsSection.tsx';
 import { ContactSection } from './components/ContactSection.tsx';
 import { Footer } from './components/Footer.tsx';
-import { AdminPortalModal } from './components/AdminPortalModal.tsx';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton.tsx';
+
+// Code-split heavy modals to drastically reduce initial bundle size and boost initial load speed
+const ConsultationModal = lazy(() =>
+  import('./components/ConsultationModal.tsx').then((m) => ({ default: m.ConsultationModal }))
+);
+const TechnicianApplicationModal = lazy(() =>
+  import('./components/TechnicianApplicationModal.tsx').then((m) => ({ default: m.TechnicianApplicationModal }))
+);
+const AdminPortalModal = lazy(() =>
+  import('./components/AdminPortalModal.tsx').then((m) => ({ default: m.AdminPortalModal }))
+);
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageView>('home');
@@ -191,21 +199,27 @@ export default function App() {
         onOpenAdminPortal={() => setAdminModalOpen(true)}
       />
 
-      {/* Modals & Dialogs */}
-      <ConsultationModal
-        isOpen={consultationModalOpen}
-        onClose={() => setConsultationModalOpen(false)}
-      />
-
-      <TechnicianApplicationModal
-        isOpen={technicianModalOpen}
-        onClose={() => setTechnicianModalOpen(false)}
-      />
-
-      <AdminPortalModal
-        isOpen={adminModalOpen}
-        onClose={() => setAdminModalOpen(false)}
-      />
+      {/* Modals & Dialogs (Loaded on-demand to optimize speed) */}
+      <Suspense fallback={null}>
+        {consultationModalOpen && (
+          <ConsultationModal
+            isOpen={consultationModalOpen}
+            onClose={() => setConsultationModalOpen(false)}
+          />
+        )}
+        {technicianModalOpen && (
+          <TechnicianApplicationModal
+            isOpen={technicianModalOpen}
+            onClose={() => setTechnicianModalOpen(false)}
+          />
+        )}
+        {adminModalOpen && (
+          <AdminPortalModal
+            isOpen={adminModalOpen}
+            onClose={() => setAdminModalOpen(false)}
+          />
+        )}
+      </Suspense>
 
       {/* Floating WhatsApp Action */}
       <WhatsAppFloatingButton />

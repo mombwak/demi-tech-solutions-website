@@ -100,8 +100,14 @@
         <div style="text-align: center; max-width: 480px; padding: 24px;">
           <div style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px;">DEMI TECH SOLUTIONS</div>
           <div style="font-size: 11px; font-family: monospace; letter-spacing: 0.12em; color: #777777; margin-bottom: 24px; text-transform: uppercase;">ENGINEERING INTELLIGENT TECHNOLOGY SYSTEMS</div>
-          <div style="width: 28px; height: 28px; border: 3px solid #f0f0f0; border-top-color: #000000; border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite;"></div>
-          <div style="font-size: 12px; color: #888888;">Initializing systems environment...</div>
+          <div id="loading-spinner" style="width: 28px; height: 28px; border: 3px solid #f0f0f0; border-top-color: #000000; border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite;"></div>
+          <div id="loading-status" style="font-size: 12px; color: #888888;">Initializing systems environment...</div>
+          <div id="loading-recovery" style="display: none; margin-top: 18px; padding-top: 16px; border-top: 1px solid #eeeeee;">
+            <p style="font-size: 11px; color: #666666; margin-bottom: 12px; line-height: 1.4;">Taking longer than expected? A previous version may be cached by your browser.</p>
+            <button onclick="window.location.reload(true)" style="background: #000000; color: #ffffff; border: none; padding: 8px 18px; font-size: 12px; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;">
+              Refresh Latest Version
+            </button>
+          </div>
         </div>
       </div>
       <style>
@@ -114,6 +120,25 @@
         </div>
       </noscript>
     </div>
+    <script>
+      // Speed & recovery monitor: if application hasn't mounted in 3 seconds, offer immediate refresh
+      setTimeout(function() {
+        if (!window.__DEMI_LOADED__) {
+          var rec = document.getElementById('loading-recovery');
+          var status = document.getElementById('loading-status');
+          if (rec) rec.style.display = 'block';
+          if (status) status.innerText = 'Optimizing bundle delivery...';
+        }
+      }, 3000);
+      window.addEventListener('error', function() {
+        if (!window.__DEMI_LOADED__) {
+          var rec = document.getElementById('loading-recovery');
+          var status = document.getElementById('loading-status');
+          if (rec) rec.style.display = 'block';
+          if (status) status.innerText = 'Fresh version ready. Please refresh.';
+        }
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,27 +1,65 @@
-# Apache Configuration for Demi Tech Solutions (cPanel / public_html)
+# ==============================================================================
+# Demi Tech Solutions – High Performance cPanel / Apache Configuration
+# ==============================================================================
+
+# Enable Rewrite Engine
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  RewriteBase /
 
-  # If requested resource exists as a file or directory, serve it directly
+  # Direct file / directory requests: serve as-is
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Never rewrite asset requests (js, css, images, fonts) to index.html to prevent MIME-type errors
-  RewriteCond %{REQUEST_URI} \.(js|mjs|css|jpg|jpeg|png|gif|svg|ico|webp|woff|woff2|ttf|eot|json)$ [NC]
+  # Never rewrite asset files to index.html (prevents MIME-type mismatch on missing assets)
+  RewriteCond %{REQUEST_URI} \.(js|mjs|css|jpg|jpeg|png|gif|svg|ico|webp|woff|woff2|ttf|eot|json|xml|txt)$ [NC]
   RewriteRule ^ - [L]
 
-  # Route all other URLs to index.html for Single Page Application routing
+  # Route all other URLs to index.html for Single Page Application client-side routing
   RewriteRule ^ index.html [L]
 </IfModule>
 
-# Force correct MIME types for JavaScript and CSS modules
+# Force Correct MIME Types
 <IfModule mod_mime.c>
   AddType application/javascript .js .mjs
   AddType text/css .css
+  AddType image/svg+xml .svg
+  AddType application/json .json
+  AddType font/woff2 .woff2
+  AddType font/woff .woff
 </IfModule>
 
-# Allow CORS for module scripts
+# Gzip / Deflate Compression for Lightning-Fast Loading Speed
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE font/ttf
+  AddOutputFilterByType DEFLATE font/otf
+  AddOutputFilterByType DEFLATE font/eot
+</IfModule>
+
+# Caching Rules: Never cache index.html (guarantees newest code is always loaded)
+# Cache hashed assets aggressively (1 year)
 <IfModule mod_headers.c>
+  # CORS header for ES module compatibility across subdomains/CDNs
   Header set Access-Control-Allow-Origin "*"
+
+  # Prevent stale index.html from freezing browser on old bundle hashes
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # Cache static hashed assets for 1 year
+  <FilesMatch "\.(js|mjs|css|woff2|woff|ttf|png|jpg|jpeg|webp|svg|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
 </IfModule>
