@@ -124,7 +124,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-bold text-black uppercase">Remote Consultation</span>
                   <span className="text-sm font-mono font-bold text-black">
-                    KES {settings.consultationFeeRemote.toLocaleString()}
+                    KES {(settings.consultationFeeRemote ?? 2500).toLocaleString()}
                   </span>
                 </div>
                 <p className="text-xs text-neutral-600 leading-relaxed">
@@ -136,7 +136,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-bold text-black uppercase">On-Site Assessment (Kisumu)</span>
                   <span className="text-sm font-mono font-bold text-black">
-                    KES {settings.consultationFeeLocal.toLocaleString()}
+                    KES {(settings.consultationFeeLocal ?? 5000).toLocaleString()}
                   </span>
                 </div>
                 <p className="text-xs text-neutral-600 leading-relaxed">
@@ -148,7 +148,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-bold text-black uppercase">Regional Assessment (Western Kenya)</span>
                   <span className="text-sm font-mono font-bold text-black">
-                    KES {settings.consultationFeeRegional.toLocaleString()}
+                    KES {(settings.consultationFeeRegional ?? 8500).toLocaleString()}
                   </span>
                 </div>
                 <p className="text-xs text-neutral-600 leading-relaxed">

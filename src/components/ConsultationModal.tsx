@@ -78,9 +78,24 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   const tillNumber = settings.mpesaTill || COMPANY_INFO.mpesaTillNumber;
 
   const copyTillNumber = () => {
-    navigator.clipboard.writeText(tillNumber);
-    setCopiedTill(true);
-    setTimeout(() => setCopiedTill(false), 2500);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(tillNumber);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = tillNumber;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopiedTill(true);
+      setTimeout(() => setCopiedTill(false), 2500);
+    } catch {
+      // Fallback silently if clipboard permissions are denied
+      setCopiedTill(true);
+      setTimeout(() => setCopiedTill(false), 2500);
+    }
   };
 
   // Helper to validate common form inputs
