@@ -1,0 +1,168 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState } from 'react';
+import { PageView } from '../types.ts';
+import { Menu, X, ArrowUpRight, Phone, MessageSquare } from 'lucide-react';
+import { COMPANY_INFO } from '../data/content.ts';
+
+interface HeaderProps {
+  currentPage: PageView;
+  onNavigate: (page: PageView) => void;
+  onOpenConsultation: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  currentPage,
+  onNavigate,
+  onOpenConsultation,
+}) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navLinks: { label: string; page: PageView }[] = [
+    { label: 'HOME', page: 'home' },
+    { label: 'ABOUT', page: 'about' },
+    { label: 'SOLUTIONS', page: 'solutions' },
+    { label: 'PROJECTS', page: 'projects' },
+    { label: 'INSIGHTS', page: 'insights' },
+    { label: 'TECHNICIAN NETWORK', page: 'technician-network' },
+    { label: 'CONTACT', page: 'contact' },
+  ];
+
+  const handleNavClick = (page: PageView) => {
+    onNavigate(page);
+    setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20 gap-8">
+          {/* Zone 1: Single text element wordmark */}
+          <button
+            onClick={() => handleNavClick('home')}
+            className="text-left text-lg sm:text-xl font-extrabold tracking-tight text-black hover:opacity-85 transition-opacity whitespace-nowrap shrink-0"
+          >
+            DEMI TECH SOLUTIONS
+          </button>
+
+          {/* Zone 2: Navigation Links (single-line, subtle hover underlines) */}
+          <nav className="hidden xl:flex items-center gap-7 text-xs font-semibold tracking-wider text-neutral-700">
+            {navLinks.map((link) => {
+              const isActive = currentPage === link.page;
+              return (
+                <button
+                  key={link.page}
+                  onClick={() => handleNavClick(link.page)}
+                  className={`relative py-1 whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                    isActive
+                      ? 'text-black font-bold'
+                      : 'text-neutral-600 hover:text-black'
+                  }`}
+                >
+                  {link.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-black" />
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Zone 3: 1 Primary Action */}
+          <div className="hidden lg:flex items-center gap-4 shrink-0">
+            <a
+              href={`tel:${COMPANY_INFO.phoneRaw}`}
+              className="text-xs font-semibold text-neutral-600 hover:text-black flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0"
+              title="Call Demi Tech Solutions"
+            >
+              <Phone className="w-3.5 h-3.5 text-neutral-500" />
+              <span>{COMPANY_INFO.phone}</span>
+            </a>
+            <button
+              onClick={onOpenConsultation}
+              className="px-5 py-2.5 text-xs font-bold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors rounded-none shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <span>BOOK A CONSULTATION</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Mobile menu trigger */}
+          <div className="flex xl:hidden items-center gap-3">
+            <button
+              onClick={onOpenConsultation}
+              className="sm:hidden px-3 py-1.5 text-[11px] font-bold text-white bg-black hover:bg-neutral-800 transition-colors whitespace-nowrap cursor-pointer"
+            >
+              CONSULT
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-neutral-800 hover:text-black focus:outline-none cursor-pointer"
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="xl:hidden bg-white border-b border-neutral-300 px-5 pt-3 pb-6 animate-in slide-in-from-top-2 duration-200 shadow-xl">
+          <div className="flex flex-col space-y-3">
+            {navLinks.map((link) => {
+              const isActive = currentPage === link.page;
+              return (
+                <button
+                  key={link.page}
+                  onClick={() => handleNavClick(link.page)}
+                  className={`text-left text-sm font-semibold tracking-wider py-2 border-b border-neutral-100 ${
+                    isActive ? 'text-black font-bold pl-2 border-l-2 border-l-black' : 'text-neutral-700'
+                  }`}
+                >
+                  {link.label}
+                </button>
+              );
+            })}
+
+            <div className="pt-3 flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenConsultation();
+                }}
+                className="w-full py-3 text-center text-xs font-bold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+              >
+                <span>BOOK A CONSULTATION</span>
+                <ArrowUpRight className="w-4 h-4" />
+              </button>
+
+              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+                <a
+                  href={`tel:${COMPANY_INFO.phoneRaw}`}
+                  className="py-2.5 px-3 bg-neutral-100 text-neutral-800 flex items-center justify-center gap-2 font-medium hover:bg-neutral-200"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>Call Office</span>
+                </a>
+                <a
+                  href={COMPANY_INFO.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2.5 px-3 bg-neutral-100 text-neutral-800 flex items-center justify-center gap-2 font-medium hover:bg-neutral-200"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};

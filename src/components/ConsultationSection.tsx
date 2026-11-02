@@ -1,0 +1,185 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import { ArrowUpRight, CheckCircle2, ShieldAlert, Calendar, Clock, CreditCard } from 'lucide-react';
+import { getAdminSettings } from '../utils/storage.ts';
+
+interface ConsultationSectionProps {
+  onOpenConsultation: () => void;
+}
+
+export const ConsultationSection: React.FC<ConsultationSectionProps> = ({
+  onOpenConsultation,
+}) => {
+  const settings = getAdminSettings();
+
+  const engagementSteps = [
+    {
+      step: '01',
+      title: 'Initial Enquiry',
+      desc: 'Submit your project scope, location, and key technical challenges via our consultation booking system.',
+    },
+    {
+      step: '02',
+      title: 'Professional Consultation',
+      desc: 'A scheduled technical discussion (Remote or On-site) with a lead systems engineer to analyze feasibility.',
+    },
+    {
+      step: '03',
+      title: 'Technical Assessment',
+      desc: 'Where necessary, physical site survey, RF heatmap, cable route measurements, and electrical power audits.',
+    },
+    {
+      step: '04',
+      title: 'Engineering Proposal',
+      desc: 'Transparent Bill of Quantities (BOQ), schematic architecture, hardware brands, labor, and delivery timelines.',
+    },
+    {
+      step: '05',
+      title: 'Implementation & Commissioning',
+      desc: 'Rigid installation, cable testing, firmware hardening, end-user training, and certified commissioning sign-off.',
+    },
+    {
+      step: '06',
+      title: 'Ongoing Support',
+      desc: 'Structured preventative maintenance, SLA options, and direct technical responsiveness.',
+    },
+  ];
+
+  return (
+    <section id="consultation" className="py-20 sm:py-28 bg-neutral-900 text-white border-b border-neutral-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Left Column: Commercial Positioning & Engagement Flow */}
+          <div className="lg:col-span-7">
+            <div className="text-xs font-mono uppercase tracking-widest text-neutral-400 mb-3">
+              Professional Engagement Process
+            </div>
+
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-6 text-balance">
+              EVERY SUCCESSFUL PROJECT STARTS WITH THE RIGHT ASSESSMENT.
+            </h2>
+
+            <div className="space-y-4 text-base text-neutral-300 leading-relaxed mb-8">
+              <p>
+                Technology investments deserve proper planning. Unplanned technology purchases routinely lead to mismatched equipment, security loopholes, and stranded capital.
+              </p>
+              <p>
+                Our professional consultations help businesses and property owners understand their technical requirements, identify suitable solutions and make informed investment decisions before implementation.
+              </p>
+            </div>
+
+            {/* Commercial Positioning Notice */}
+            <div className="p-5 bg-neutral-950 border border-neutral-800 mb-10">
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-mono uppercase tracking-wider text-white font-bold mb-1">
+                    Chargeable Engineering Consultations
+                  </h4>
+                  <p className="text-xs text-neutral-400 leading-relaxed">
+                    Demi Tech Solutions conducts structured consultations by appointment. We do not offer generic, superficial sales pitches; you receive dedicated engineering time, preliminary schematic evaluation, and actionable technical specifications.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 6-Step Process */}
+            <h3 className="text-xs font-mono uppercase tracking-widest text-neutral-400 mb-6 font-bold">
+              Our 6-Step Engineering Methodology:
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {engagementSteps.map((s) => (
+                <div key={s.step} className="p-4 bg-neutral-950/70 border border-neutral-800">
+                  <div className="text-xs font-mono font-bold text-neutral-400 mb-1">
+                    PHASE {s.step}
+                  </div>
+                  <h4 className="text-sm font-bold text-white mb-1.5">{s.title}</h4>
+                  <p className="text-xs text-neutral-400 leading-relaxed">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: Pricing & Quick Booking Callout */}
+          <div className="lg:col-span-5 bg-white text-black p-8 sm:p-10 border border-neutral-200">
+            <div className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-2">
+              Appointment Scheduling
+            </div>
+            <h3 className="text-2xl font-extrabold text-black mb-4">
+              Book Your Technical Consultation
+            </h3>
+
+            <p className="text-xs text-neutral-600 leading-relaxed mb-6">
+              Select the consultation format that matches your project requirements. Appointments are confirmed upon M-Pesa receipt verification.
+            </p>
+
+            {/* Fee Tiers */}
+            <div className="space-y-4 mb-8">
+              <div className="p-4 bg-neutral-50 border border-neutral-200">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold text-black uppercase">Remote Consultation</span>
+                  <span className="text-sm font-mono font-bold text-black">
+                    KES {settings.consultationFeeRemote.toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-600 leading-relaxed">
+                  Zoom / Google Meet or phone review. In-depth technical briefing, scope evaluation, and BoQ guidance.
+                </p>
+              </div>
+
+              <div className="p-4 bg-neutral-50 border border-neutral-200">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold text-black uppercase">On-Site Assessment (Kisumu)</span>
+                  <span className="text-sm font-mono font-bold text-black">
+                    KES {settings.consultationFeeLocal.toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-600 leading-relaxed">
+                  Physical visit within Kisumu and immediate environs. Precise cable measurements, RF audit & electrical load analysis.
+                </p>
+              </div>
+
+              <div className="p-4 bg-neutral-50 border border-neutral-200">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold text-black uppercase">Regional Assessment (Western Kenya)</span>
+                  <span className="text-sm font-mono font-bold text-black">
+                    KES {settings.consultationFeeRegional.toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-600 leading-relaxed">
+                  On-site engineering inspection across Kakamega, Bungoma, Busia, Siaya, Homa Bay, Vihiga, Migori.
+                </p>
+              </div>
+            </div>
+
+            {/* M-Pesa Instructions Briefing */}
+            <div className="p-4 bg-neutral-100 border border-neutral-300 text-xs text-neutral-700 mb-8 space-y-1 font-mono">
+              <div className="font-bold text-black flex items-center gap-1.5 font-sans mb-1">
+                <CreditCard className="w-3.5 h-3.5" />
+                <span>M-Pesa Payment Instructions:</span>
+              </div>
+              <div>Paybill: <strong className="text-black">{settings.mpesaPaybill}</strong></div>
+              <div>Account: <strong className="text-black">{settings.mpesaAccount}</strong></div>
+              <div className="text-[11px] text-neutral-500 pt-1">
+                Fee is fully credited towards your project implementation upon commissioning.
+              </div>
+            </div>
+
+            <button
+              onClick={onOpenConsultation}
+              className="w-full py-4 text-xs font-bold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+            >
+              <span>BOOK YOUR CONSULTATION</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
