@@ -92,16 +92,16 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Mobile menu trigger */}
-          <div className="flex xl:hidden items-center gap-3">
+          <div className="flex xl:hidden items-center gap-2">
             <button
               onClick={onOpenConsultation}
-              className="sm:hidden px-3 py-1.5 text-[11px] font-bold text-white bg-black hover:bg-neutral-800 transition-colors whitespace-nowrap cursor-pointer"
+              className="sm:hidden px-3.5 py-2 min-h-[40px] text-[11px] font-bold text-white bg-black hover:bg-neutral-800 transition-colors whitespace-nowrap cursor-pointer flex items-center justify-center"
             >
               CONSULT
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-neutral-800 hover:text-black focus:outline-none cursor-pointer"
+              className="min-w-[48px] min-h-[48px] flex items-center justify-center text-neutral-800 hover:text-black focus:outline-none cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -113,15 +113,15 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="xl:hidden bg-white border-b border-neutral-300 px-5 pt-3 pb-6 animate-in slide-in-from-top-2 duration-200 shadow-xl">
-          <div className="flex flex-col space-y-3">
+          <div className="flex flex-col space-y-1">
             {navLinks.map((link) => {
               const isActive = currentPage === link.page;
               return (
                 <button
                   key={link.page}
                   onClick={() => handleNavClick(link.page)}
-                  className={`text-left text-sm font-semibold tracking-wider py-2 border-b border-neutral-100 ${
-                    isActive ? 'text-black font-bold pl-2 border-l-2 border-l-black' : 'text-neutral-700'
+                  className={`text-left text-sm font-semibold tracking-wider py-3 px-2 min-h-[44px] flex items-center border-b border-neutral-100 ${
+                    isActive ? 'text-black font-bold pl-3 border-l-2 border-l-black bg-neutral-50' : 'text-neutral-700 hover:bg-neutral-50'
                   }`}
                 >
                   {link.label}
@@ -129,13 +129,13 @@ export const Header: React.FC<HeaderProps> = ({
               );
             })}
 
-            <div className="pt-3 flex flex-col gap-3">
+            <div className="pt-4 flex flex-col gap-3">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   onOpenConsultation();
                 }}
-                className="w-full py-3 text-center text-xs font-bold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3.5 min-h-[48px] text-center text-xs font-bold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
               >
                 <span>BOOK A CONSULTATION</span>
                 <ArrowUpRight className="w-4 h-4" />
@@ -144,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
                 <a
                   href={`tel:${COMPANY_INFO.phoneRaw}`}
-                  className="py-2.5 px-3 bg-neutral-100 text-neutral-800 flex items-center justify-center gap-2 font-medium hover:bg-neutral-200"
+                  className="py-3 px-3 min-h-[44px] bg-neutral-100 text-neutral-800 flex items-center justify-center gap-2 font-medium hover:bg-neutral-200"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>Call Office</span>
@@ -153,7 +153,7 @@ export const Header: React.FC<HeaderProps> = ({
                   href={COMPANY_INFO.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="py-2.5 px-3 bg-neutral-100 text-neutral-800 flex items-center justify-center gap-2 font-medium hover:bg-neutral-200"
+                  className="py-3 px-3 min-h-[44px] bg-neutral-100 text-neutral-800 flex items-center justify-center gap-2 font-medium hover:bg-neutral-200"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>WhatsApp</span>

@@ -85,13 +85,27 @@ export const ProjectsPortfolio: React.FC<ProjectsPortfolioProps> = ({
               <div>
                 {/* Visual */}
                 <div className="aspect-[16/10] bg-neutral-900 overflow-hidden relative border-b border-neutral-200">
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    referrerPolicy="no-referrer"
-                    loading="lazy"
-                  />
+                  <picture>
+                    <source
+                      type="image/webp"
+                      media="(max-width: 640px)"
+                      srcSet={project.image.replace('.jpg', '-mobile.webp')}
+                    />
+                    <source
+                      type="image/webp"
+                      srcSet={project.image.replace('.jpg', '.webp')}
+                    />
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      width={640}
+                      height={400}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
                   <div className="absolute top-3 left-3 bg-black/85 text-white text-[10px] font-mono tracking-wider px-2.5 py-1 uppercase">
                     {project.category}
                   </div>

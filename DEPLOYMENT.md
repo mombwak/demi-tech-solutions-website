@@ -38,39 +38,44 @@ The output bundle will be generated inside the `/dist` directory. The build conf
 
 ---
 
-## 2. cPanel Static Deployment (`public_html`)
+## 2. cPanel Static & Apache Deployment (`public_html`)
 
-If your cPanel plan only supports standard static hosting without a Node.js daemon:
+If your cPanel hosting uses Apache with PHP (the most common Kenyan hosting configuration) or standard static hosting without a Node.js daemon:
 
-### Step 1: Prepare the Deployment Archive
-You can compress the `/dist` directory into a `.zip` archive:
+### Step 1: Generate or Download the Fresh Deployment Archive
+Run the pre-configured build script to produce a clean, production-ready archive:
 ```bash
-cd dist
-zip -r ../public_html_deployment.zip .
-cd ..
+npm run build:cpanel
 ```
-*(Alternatively, download the pre-generated `public_html_deployment.zip` from the repository root).*
+*(Alternatively, you can download `public_html_deployment.zip` directly from the development server URL `/public_html_deployment.zip` or `/public_html_deployment`).*
 
 ### Step 2: Upload to cPanel File Manager
 1. Log in to your cPanel control panel (`https://yourdomain.com:2083`).
 2. Open **File Manager** and navigate into the `public_html` directory (or your target subdomain directory).
-3. If this is a fresh deployment or clean update:
-   - Ensure you backup any existing customer files.
-   - Delete outdated hashed assets from older builds inside `assets/`.
+3. If this is a fresh update:
+   - Delete outdated hashed bundles inside `assets/`.
 4. Click **Upload** in the top toolbar and select `public_html_deployment.zip`.
 5. Once upload reaches 100%, return to File Manager, right-click `public_html_deployment.zip`, and choose **Extract**.
-6. Ensure the extracted files sit directly in `public_html/`, not inside a nested `dist/` subfolder:
+6. Ensure the extracted files sit directly in `public_html/`, not inside a nested subfolder:
    ```
    public_html/
    ├── index.html
    ├── .htaccess
-   ├── favicon.svg
    ├── robots.txt
+   ├── sitemap.xml
+   ├── api/
+   │   └── mpesa/
+   │       ├── stkpush.php
+   │       ├── status.php
+   │       ├── simulate-action.php
+   │       ├── config-status.php
+   │       └── temporary-credentials.php
    └── assets/
        ├── index-*.js
        ├── index-*.css
        ├── vendor-react-*.js
-       └── vendor-icons-*.js
+       ├── vendor-icons-*.js
+       └── images/
    ```
 
 ### Step 3: Ensure Hidden Files Are Visible
@@ -78,7 +83,7 @@ By default, cPanel hides files starting with a dot (such as `.htaccess`).
 - Click **Settings** (gear icon in the top right of File Manager).
 - Check **"Show Hidden Files (dotfiles)"**.
 - Click **Save**.
-- Verify that `.htaccess` is present in `public_html/`.
+- Verify that `.htaccess` is present in `public_html/`. The included `.htaccess` routes SPA requests properly, routes `/api/mpesa/*` to the PHP handlers, and prevents `/api/` from rewriting to HTML (eliminating "Unexpected token <... is not valid JSON" errors).
 
 ---
 

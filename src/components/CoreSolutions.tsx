@@ -137,13 +137,27 @@ export const CoreSolutions: React.FC<CoreSolutionsProps> = ({
             {/* Right Column: High-Resolution Installation Photo & Technical Specs */}
             <div className="lg:col-span-5 space-y-6">
               <div className="aspect-[4/3] bg-neutral-900 overflow-hidden relative border border-neutral-200">
-                <img
-                  src={activeDivision.image}
-                  alt={activeDivision.imageAlt}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
-                />
+                <picture>
+                  <source
+                    type="image/webp"
+                    media="(max-width: 640px)"
+                    srcSet={activeDivision.image.replace('.jpg', '-mobile.webp')}
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet={activeDivision.image.replace('.jpg', '.webp')}
+                  />
+                  <img
+                    src={activeDivision.image}
+                    alt={activeDivision.imageAlt}
+                    width={640}
+                    height={480}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
                 <div className="absolute bottom-4 left-4 right-4 text-white text-xs font-mono">
                   <div className="uppercase tracking-widest text-neutral-300">Installed by Demi Tech</div>

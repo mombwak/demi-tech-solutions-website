@@ -96,26 +96,42 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
     try {
       const res = await fetch('/api/mpesa/temporary-credentials', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(darajaConfig),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
+
+      let data: any = null;
+      if (res.headers.get('content-type')?.includes('application/json')) {
+        try {
+          data = await res.json();
+        } catch {
+          // Handled below
+        }
+      }
+
+      if (data && res.ok && data.success) {
         saveStoredDarajaConfig(darajaConfig);
         setDarajaNotice({
           type: 'success',
           message: data.message || 'Safaricom Daraja API authenticated successfully!',
         });
-      } else {
+      } else if (data) {
         setDarajaNotice({
           type: 'error',
           message: data.error || 'Failed to authenticate with Safaricom Daraja.',
         });
+      } else {
+        saveStoredDarajaConfig(darajaConfig);
+        setDarajaNotice({
+          type: 'success',
+          message: 'Credentials saved locally in browser storage (cPanel static fallback active).',
+        });
       }
-    } catch (err: any) {
+    } catch {
+      saveStoredDarajaConfig(darajaConfig);
       setDarajaNotice({
-        type: 'error',
-        message: err.message || 'Network error reaching API endpoint.',
+        type: 'success',
+        message: 'Credentials saved locally in browser storage.',
       });
     } finally {
       setDarajaVerifying(false);

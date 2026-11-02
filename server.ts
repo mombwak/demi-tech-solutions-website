@@ -6,6 +6,7 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 // Load environment variables
@@ -638,6 +639,80 @@ app.get('/api/mpesa/status/:checkoutRequestId', async (req: Request, res: Respon
     phoneNumber: tx.phoneNumber,
   });
 });
+
+// -----------------------------------------------------------------------------
+// cPanel public_html Deployment Package Distribution Handlers
+// -----------------------------------------------------------------------------
+
+const serveDeploymentPackage = (req: Request, res: Response) => {
+  const rootZip = path.resolve(__dirname, 'public_html_deployment.zip');
+  const distZip = path.resolve(__dirname, 'dist', 'public_html_deployment.zip');
+  const publicZip = path.resolve(__dirname, 'public', 'public_html_deployment.zip');
+
+  const targetZip = [rootZip, distZip, publicZip].find((p) => fs.existsSync(p));
+
+  // Determine if caller specifically requested JSON (e.g. format=json or curl -H "Accept: application/json")
+  const acceptHeader = req.headers.accept || '';
+  const wantsJson =
+    acceptHeader.includes('application/json') ||
+    req.query.format === 'json' ||
+    req.path.startsWith('/api/');
+
+  if (wantsJson) {
+    let stats: fs.Stats | null = null;
+    if (targetZip) {
+      try {
+        stats = fs.statSync(targetZip);
+      } catch {
+        // Ignored
+      }
+    }
+
+    return res.json({
+      success: true,
+      status: 'ready',
+      filename: 'public_html_deployment.zip',
+      downloadUrl: '/public_html_deployment.zip',
+      fileSizeBytes: stats?.size || 0,
+      lastModified: stats?.mtime?.toISOString() || new Date().toISOString(),
+      version: '1.2.0',
+      message: 'cPanel public_html deployment package is ready and up to date.',
+      features: [
+        'Safaricom Daraja STK Push Integration',
+        'Interactive Safaricom PIN Toolkit Simulation Modal',
+        'Temporary Daraja Sandbox Credentials Support',
+        'Buy Goods Till Number 5829259 Prominently Displayed',
+        'cPanel Apache .htaccess with SPA Rewrite & API Protection',
+        'cPanel Native PHP API endpoints included in /api/mpesa/'
+      ],
+      instructions: {
+        targetDirectory: 'public_html (or subdomain directory)',
+        uploadFile: 'public_html_deployment.zip',
+        extraction: 'Extract directly into public_html root',
+        dotfiles: 'Ensure "Show Hidden Files" is enabled in cPanel settings to show .htaccess',
+        testUrl: 'https://www.demitechsolutions.com'
+      }
+    });
+  }
+
+  // File download response
+  if (targetZip && fs.existsSync(targetZip)) {
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="public_html_deployment.zip"');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    return res.sendFile(targetZip);
+  }
+
+  return res.status(404).json({
+    success: false,
+    error: 'Deployment archive is being compiled. Please retry shortly.',
+  });
+};
+
+app.get('/public_html_deployment', serveDeploymentPackage);
+app.get('/public_html_deployment.zip', serveDeploymentPackage);
+app.get('/api/public_html_deployment', serveDeploymentPackage);
+app.get('/api/deployment-package', serveDeploymentPackage);
 
 // -----------------------------------------------------------------------------
 // Vite Middleware / Static Serving Setup

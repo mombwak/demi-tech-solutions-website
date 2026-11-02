@@ -21,7 +21,7 @@
       content="Intelligent security, business automation, enterprise networking, and power infrastructure for businesses and institutions across Kenya."
     />
     <meta property="og:url" content="https://www.demitechsolutions.com" />
-    <meta property="og:image" content="/src/assets/images/hero_corporate_tech_1793582462732.jpg" />
+    <meta property="og:image" content="/assets/images/hero_corporate_tech_1793582462732.webp" />
     
     <!-- Twitter Metadata -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -30,12 +30,24 @@
       name="twitter:description"
       content="Intelligent security, business automation, enterprise networking, and power infrastructure for businesses and institutions across Kenya."
     />
-    <meta name="twitter:image" content="/src/assets/images/hero_corporate_tech_1793582462732.jpg" />
+    <meta name="twitter:image" content="/assets/images/hero_corporate_tech_1793582462732.webp" />
 
-    <!-- Google Fonts: Manrope & JetBrains Mono -->
+    <!-- Performance: DNS Prefetch & Preconnect for High-Speed Delivery -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Performance: Preload Critical Hero Image for Instant LCP -->
+    <link rel="preload" as="image" href="/assets/images/hero_corporate_tech_1793582462732-mobile.webp" type="image/webp" media="(max-width: 640px)" fetchpriority="high" />
+    <link rel="preload" as="image" href="/assets/images/hero_corporate_tech_1793582462732.webp" type="image/webp" media="(min-width: 641px)" fetchpriority="high" />
+
+    <!-- Performance: Non-Render-Blocking Web Fonts with Fallbacks -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;600;700;800&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;600;700;800&display=swap" />
+    </noscript>
 
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
@@ -95,50 +107,58 @@
     </script>
   </head>
   <body class="bg-white text-neutral-900 font-sans antialiased selection:bg-neutral-900 selection:text-white">
+    <!-- Immediate High-Speed Pre-rendered Shell: Instant FCP and LCP with Zero CLS -->
     <div id="root">
-      <div id="app-loading-fallback" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #ffffff; color: #171717;">
-        <div style="text-align: center; max-width: 480px; padding: 24px;">
-          <div style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px;">DEMI TECH SOLUTIONS</div>
-          <div style="font-size: 11px; font-family: monospace; letter-spacing: 0.12em; color: #777777; margin-bottom: 24px; text-transform: uppercase;">ENGINEERING INTELLIGENT TECHNOLOGY SYSTEMS</div>
-          <div id="loading-spinner" style="width: 28px; height: 28px; border: 3px solid #f0f0f0; border-top-color: #000000; border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite;"></div>
-          <div id="loading-status" style="font-size: 12px; color: #888888;">Initializing systems environment...</div>
-          <div id="loading-recovery" style="display: none; margin-top: 18px; padding-top: 16px; border-top: 1px solid #eeeeee;">
-            <p style="font-size: 11px; color: #666666; margin-bottom: 12px; line-height: 1.4;">Taking longer than expected? A previous version may be cached by your browser.</p>
-            <button onclick="window.location.reload(true)" style="background: #000000; color: #ffffff; border: none; padding: 8px 18px; font-size: 12px; font-weight: 600; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase;">
-              Refresh Latest Version
-            </button>
+      <header style="background: #ffffff; border-bottom: 1px solid #e5e5e5; position: sticky; top: 0; z-index: 40;">
+        <div style="max-width: 1280px; margin: 0 auto; padding: 0 16px; height: 80px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em; color: #000000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            DEMI TECH SOLUTIONS
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <a href="tel:+254703293201" style="font-size: 12px; font-weight: 600; color: #404040; text-decoration: none; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+              +254 703 293201
+            </a>
+            <a href="#consultation" style="background: #000000; color: #ffffff; padding: 10px 18px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-decoration: none; text-transform: uppercase;">
+              BOOK CONSULTATION
+            </a>
           </div>
         </div>
-      </div>
-      <style>
-        @keyframes spin { to { transform: rotate(360deg); } }
-      </style>
+      </header>
+
+      <section style="background: #ffffff; padding-top: 32px; padding-bottom: 48px; border-bottom: 1px solid #e5e5e5;">
+        <div style="max-width: 1280px; margin: 0 auto; padding: 0 16px;">
+          <div style="font-size: 12px; font-family: monospace; letter-spacing: 0.1em; color: #737373; text-transform: uppercase; margin-bottom: 16px;">
+            Kisumu, Kenya · Western Kenya · Nationwide Engineering
+          </div>
+          <h1 style="font-size: clamp(28px, 5vw, 48px); font-weight: 800; color: #000000; letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 20px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            ENGINEERING INTELLIGENT TECHNOLOGY SYSTEMS.
+          </h1>
+          <div style="width: 64px; height: 4px; background: #000000; margin-bottom: 24px;"></div>
+          <p style="font-size: 16px; color: #404040; line-height: 1.6; max-width: 720px; margin: 0 0 32px 0;">
+            We design, integrate and maintain intelligent technology solutions for businesses, institutions and properties across Kenya. Our expertise spans security engineering, enterprise systems, business automation and technology infrastructure.
+          </p>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;">
+            <a href="#consultation" style="background: #000000; color: #ffffff; padding: 14px 28px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-decoration: none; text-transform: uppercase; display: inline-block;">
+              BOOK A PROFESSIONAL CONSULTATION
+            </a>
+            <a href="#solutions" style="background: #ffffff; color: #000000; border: 1px solid #d4d4d4; padding: 14px 28px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-decoration: none; text-transform: uppercase; display: inline-block;">
+              EXPLORE OUR SOLUTIONS
+            </a>
+          </div>
+          <div style="font-size: 12px; color: #737373; padding-top: 12px; border-top: 1px solid #f5f5f5;">
+            Direct Engineering Desk: <a href="https://wa.me/254703293201?text=Hello%20Demi%20Tech%20Solutions%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20professional%20consultation." style="color: #000000; font-weight: 600; text-decoration: underline;">Talk directly via WhatsApp (+254 703 293201)</a>
+          </div>
+        </div>
+      </section>
+
       <noscript>
         <div style="padding: 24px; text-align: center; font-family: sans-serif;">
           <h2>JavaScript Required</h2>
-          <p>Please enable JavaScript in your browser to experience the Demi Tech Solutions platform.</p>
+          <p>Please enable JavaScript in your browser to access interactive consultation booking and M-Pesa STK Push payments.</p>
         </div>
       </noscript>
     </div>
-    <script>
-      // Speed & recovery monitor: if application hasn't mounted in 3 seconds, offer immediate refresh
-      setTimeout(function() {
-        if (!window.__DEMI_LOADED__) {
-          var rec = document.getElementById('loading-recovery');
-          var status = document.getElementById('loading-status');
-          if (rec) rec.style.display = 'block';
-          if (status) status.innerText = 'Optimizing bundle delivery...';
-        }
-      }, 3000);
-      window.addEventListener('error', function() {
-        if (!window.__DEMI_LOADED__) {
-          var rec = document.getElementById('loading-recovery');
-          var status = document.getElementById('loading-status');
-          if (rec) rec.style.display = 'block';
-          if (status) status.innerText = 'Fresh version ready. Please refresh.';
-        }
-      });
-    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

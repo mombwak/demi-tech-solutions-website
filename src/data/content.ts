@@ -37,7 +37,7 @@ export const CORE_DIVISIONS: SolutionDivision[] = [
     headline: 'INTELLIGENT PERIMETER DEFENSE & COMMERCIAL IP SURVEILLANCE',
     description:
       'Intelligent security solutions designed to protect commercial properties, institutions, residential developments and business assets.',
-    image: '/src/assets/images/security_cctv_deployment_1793582463628.jpg',
+    image: '/assets/images/security_cctv_deployment_1793582463628.jpg',
     imageAlt: 'Rigid conduit commercial CCTV surveillance camera installed on modern architectural facade',
     services: [
       'CCTV systems (Hikvision and Dahua)',
@@ -95,7 +95,7 @@ export const CORE_DIVISIONS: SolutionDivision[] = [
     headline: 'SEAMLESS POS, ERP AND REAL-TIME BUSINESS MANAGEMENT',
     description:
       'We help businesses improve operational efficiency through integrated management systems, automation and real-time business visibility.',
-    image: '/src/assets/images/pos_retail_automation_1793582465220.jpg',
+    image: '/assets/images/pos_retail_automation_1793582465220.jpg',
     imageAlt: 'High-end retail Point of Sale touchscreen workstation and receipt hardware in modern commercial store',
     services: [
       'Point of Sale (POS) systems',
@@ -153,7 +153,7 @@ export const CORE_DIVISIONS: SolutionDivision[] = [
     headline: 'MISSION-CRITICAL NETWORKING, IT INFRASTRUCTURE & SOFTWARE',
     description:
       'Technology infrastructure and software systems that help organisations operate efficiently, securely and reliably.',
-    image: '/src/assets/images/network_datacenter_racks_1793582464826.jpg',
+    image: '/assets/images/network_datacenter_racks_1793582464826.jpg',
     imageAlt: 'Immaculately dressed enterprise server rack with patch panels and MikroTik routing switches',
     services: [
       'Enterprise resource planning (ERP)',
@@ -211,7 +211,7 @@ export const CORE_DIVISIONS: SolutionDivision[] = [
     headline: 'UNINTERRUPTED POWER RESILIENCE & SATELLITE CONNECTIVITY',
     description:
       'Reliable power and connectivity infrastructure designed to support uninterrupted business operations.',
-    image: '/src/assets/images/solar_power_resilience_1793582465096.jpg',
+    image: '/assets/images/solar_power_resilience_1793582465096.jpg',
     imageAlt: 'Industrial solar hybrid inverter and rackmount lithium battery backup system with clean electrical distribution',
     services: [
       'Commercial solar backup systems',
@@ -318,7 +318,7 @@ export const REAL_PROJECTS: ProjectItem[] = [
       'Instant SMS and audible alerts on fence wire touch or breach',
       '90 days of evidentiary footage backed up securely off-site',
     ],
-    image: '/src/assets/images/security_cctv_deployment_1793582463628.jpg',
+    image: '/assets/images/security_cctv_deployment_1793582463628.jpg',
     year: '2025',
   },
   {
@@ -342,7 +342,7 @@ export const REAL_PROJECTS: ProjectItem[] = [
       '100% automated KRA compliance with zero manual bookkeeper intervention',
       'Real-time central visibility of stock levels across all branches from a phone or laptop',
     ],
-    image: '/src/assets/images/pos_retail_automation_1793582465220.jpg',
+    image: '/assets/images/pos_retail_automation_1793582465220.jpg',
     year: '2025',
   },
   {
@@ -366,7 +366,7 @@ export const REAL_PROJECTS: ProjectItem[] = [
       'Sub-second retrieval of high-resolution digital X-rays and ultrasound scans',
       'Clean uninterrupted power conditioning preserving sensitive lab analyzers',
     ],
-    image: '/src/assets/images/network_datacenter_racks_1793582464826.jpg',
+    image: '/assets/images/network_datacenter_racks_1793582464826.jpg',
     year: '2025',
   },
   {
@@ -390,7 +390,7 @@ export const REAL_PROJECTS: ProjectItem[] = [
       'Seamless 8ms switchover during KPLC power cuts with zero system rebooting',
       'Zero internet downtime even during extensive regional telecommunication breaks',
     ],
-    image: '/src/assets/images/solar_power_resilience_1793582465096.jpg',
+    image: '/assets/images/solar_power_resilience_1793582465096.jpg',
     year: '2026',
   },
   {
@@ -414,7 +414,7 @@ export const REAL_PROJECTS: ProjectItem[] = [
       'Single consolidated guest bill upon checkout across dining, bar, and lodging',
       'Crystal-clear digital telephone communication between reception and room service',
     ],
-    image: '/src/assets/images/hero_corporate_tech_1793582462732.jpg',
+    image: '/assets/images/hero_corporate_tech_1793582462732.jpg',
     year: '2026',
   },
 ];

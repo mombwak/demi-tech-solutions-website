@@ -77,13 +77,28 @@ export const Hero: React.FC<HeroProps> = ({
           {/* Right Column: Architectural / Infrastructure Visual */}
           <div className="lg:col-span-5 relative flex items-center">
             <div className="w-full h-full min-h-[380px] sm:min-h-[460px] bg-neutral-900 overflow-hidden relative border border-neutral-200">
-              <img
-                src="/src/assets/images/hero_corporate_tech_1793582462732.jpg"
-                alt="Demi Tech Solutions commercial technology and systems integration facility"
-                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                referrerPolicy="no-referrer"
-                loading="eager"
-              />
+              <picture>
+                <source
+                  type="image/webp"
+                  media="(max-width: 640px)"
+                  srcSet="/assets/images/hero_corporate_tech_1793582462732-mobile.webp"
+                />
+                <source
+                  type="image/webp"
+                  srcSet="/assets/images/hero_corporate_tech_1793582462732.webp"
+                />
+                <img
+                  src="/assets/images/hero_corporate_tech_1793582462732.jpg"
+                  alt="Demi Tech Solutions commercial technology and systems integration facility"
+                  width={800}
+                  height={533}
+                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                  referrerPolicy="no-referrer"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </picture>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent pointer-events-none" />
               
               <div className="absolute bottom-6 left-6 right-6 text-white pointer-events-none">

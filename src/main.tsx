@@ -16,14 +16,6 @@ if (container) {
   try {
     const root = createRoot(container);
     root.render(<App />);
-
-    // Clean up fallback loading element once React is mounted
-    setTimeout(() => {
-      const fallback = document.getElementById('app-loading-fallback');
-      if (fallback) {
-        fallback.style.display = 'none';
-      }
-    }, 50);
   } catch (err: any) {
     console.error('Fatal initialization error:', err);
     container.innerHTML = `
