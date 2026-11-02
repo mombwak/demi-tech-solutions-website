@@ -4,10 +4,18 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, CheckCircle2, ArrowRight, ShieldCheck, Copy, Check, Smartphone, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
-import { getAdminSettings, saveConsultation } from '../utils/storage.ts';
+import { X, CheckCircle2, ArrowRight, ShieldCheck, Copy, Check, Smartphone, AlertCircle, RefreshCw, Loader2, Key, SlidersHorizontal, Sparkles } from 'lucide-react';
+import {
+  getAdminSettings,
+  saveConsultation,
+  getStoredDarajaConfig,
+  saveStoredDarajaConfig,
+  DarajaTemporaryConfig,
+  DARAJA_SANDBOX_DEFAULTS,
+} from '../utils/storage.ts';
 import { ConsultationBooking } from '../types.ts';
 import { KENYA_COUNTIES, COMPANY_INFO } from '../data/content.ts';
+import { SafaricomStkPromptModal } from './SafaricomStkPromptModal.tsx';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -35,6 +43,15 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     'Remote Consultation' | 'On-site Consultation (Kisumu & Western Kenya)'
   >('Remote Consultation');
 
+  // Daraja Temporary Credentials and Sandbox Simulator states
+  const [darajaConfig, setDarajaConfig] = useState<DarajaTemporaryConfig>(getStoredDarajaConfig());
+  const [showDarajaDrawer, setShowDarajaDrawer] = useState(false);
+  const [testingConnection, setTestingConnection] = useState(false);
+  const [testConnectionNotice, setTestConnectionNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isSimulatedPrompt, setIsSimulatedPrompt] = useState(false);
+  const [showPromptOverlay, setShowPromptOverlay] = useState(false);
+  const [simCountdown, setSimCountdown] = useState<number>(4);
+
   // Payment states
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('stk');
   const [stkPhone, setStkPhone] = useState('');
@@ -48,6 +65,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   const [confirmedBooking, setConfirmedBooking] = useState<ConsultationBooking | null>(null);
 
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
 
   // Sync STK phone with contact phone initially
@@ -108,8 +126,55 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   };
 
   // ---------------------------------------------------------------------------
-  // M-PESA STK PUSH FLOW
+  // M-PESA STK PUSH FLOW (WITH TEMPORARY CREDENTIALS & SIMULATOR)
   // ---------------------------------------------------------------------------
+  const handleTestTemporaryCredentials = async () => {
+    setTestingConnection(true);
+    setTestConnectionNotice(null);
+
+    try {
+      const response = await fetch('/api/mpesa/temporary-credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(darajaConfig),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        saveStoredDarajaConfig(darajaConfig);
+        setTestConnectionNotice({
+          type: 'success',
+          message: data.message || 'Safaricom Daraja connection verified successfully!',
+        });
+      } else {
+        setTestConnectionNotice({
+          type: 'error',
+          message: data.error || 'Failed to authenticate with Daraja.',
+        });
+      }
+    } catch (err: any) {
+      setTestConnectionNotice({
+        type: 'error',
+        message: err.message || 'Network error reaching server endpoint.',
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
+  const handleSimulateAction = async (action: 'CONFIRM' | 'CANCEL') => {
+    if (!checkoutRequestId) return;
+    try {
+      await fetch('/api/mpesa/simulate-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkoutRequestId, action }),
+      });
+    } catch (err) {
+      console.error('Failed to trigger simulation action', err);
+    }
+  };
+
   const handleInitiateStkPush = async () => {
     setErrorMsg('');
     if (!validateFormFields()) return;
@@ -123,6 +188,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     setStkStatus('initiating');
     setStkMessage('Connecting to Safaricom Daraja Gateway...');
     setStkErrorDetails('');
+    setIsSimulatedPrompt(false);
 
     try {
       const response = await fetch('/api/mpesa/stkpush', {
@@ -135,22 +201,26 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
           amount: currentFee,
           accountReference: `CONS-${Date.now().toString().slice(-4)}`,
           transactionDesc: 'Consultation',
+          temporaryCredentials: darajaConfig,
         }),
       });
 
       const data = await response.json();
 
       if (response.status === 503 || data.configured === false) {
-        // Daraja credentials not configured on server
         setStkStatus('unconfigured');
         setStkMessage(data.error || 'Safaricom Daraja API credentials are not configured on this server.');
-        setStkErrorDetails(data.details || 'Please configure MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_PASSKEY, and MPESA_SHORTCODE in environment variables.');
+        setStkErrorDetails(data.details || 'Please configure credentials or enable the Sandbox Simulator.');
         return;
       }
 
       if (response.ok && data.success) {
         setStkStatus('pending_pin');
+        setShowPromptOverlay(true);
         setCheckoutRequestId(data.checkoutRequestId);
+        const isSim = Boolean(data.isSimulated || data.checkoutRequestId?.startsWith('ws_CO_SIM_'));
+        setIsSimulatedPrompt(isSim);
+
         setStkMessage(data.customerMessage || `Payment prompt sent to ${phoneToCharge}. Please enter your M-Pesa PIN on your phone.`);
         startPollingStatus(data.checkoutRequestId, phoneToCharge);
       } else {
@@ -181,6 +251,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
 
         if (data.status === 'SUCCESS') {
           if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          setShowPromptOverlay(false);
           setStkStatus('success');
           setStkMessage(`Payment verified successfully! Safaricom Receipt: ${data.mpesaReceiptNumber || 'Verified'}`);
 
@@ -191,10 +262,12 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
           });
         } else if (data.status === 'CANCELLED') {
           if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          setShowPromptOverlay(false);
           setStkStatus('cancelled');
           setStkMessage('The payment request was cancelled on your phone.');
         } else if (data.status === 'FAILED') {
           if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          setShowPromptOverlay(false);
           setStkStatus('failed');
           setStkMessage(data.resultDesc || 'Payment failed or timed out.');
         }
@@ -205,6 +278,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
       // Timeout after 60 seconds (24 attempts x 2.5s)
       if (pollAttemptsRef.current >= 24) {
         if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+        setShowPromptOverlay(false);
         if (stkStatus === 'pending_pin') {
           setStkStatus('failed');
           setStkMessage('Payment verification timed out. If you entered your PIN, please enter your M-Pesa receipt code below.');
@@ -568,8 +642,167 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
               {/* PAYMENT OPTION 1: STK PUSH (Lipa na M-Pesa Online) */}
               {paymentMode === 'stk' && (
                 <div className="space-y-4">
-                  <div className="text-xs text-neutral-700 leading-relaxed">
-                    Receive an instant Lipa na M-Pesa payment prompt on your mobile phone to complete payment.
+                  {/* Daraja Status Banner & Temporary Credentials Drawer Trigger */}
+                  <div className="p-3 bg-white border border-neutral-300 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${darajaConfig.simulatorMode ? 'bg-amber-500' : 'bg-emerald-600'} animate-pulse`} />
+                        <span className="text-xs font-mono font-bold text-black">
+                          {darajaConfig.simulatorMode
+                            ? '⚡ Daraja Sandbox Simulator Active'
+                            : `Safaricom Daraja Gateway (${darajaConfig.environment})`}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowDarajaDrawer(!showDarajaDrawer)}
+                        className="text-[11px] font-mono text-black underline flex items-center gap-1 hover:text-neutral-600 cursor-pointer"
+                      >
+                        <Key className="w-3 h-3" />
+                        <span>{showDarajaDrawer ? 'Hide Credentials' : 'Temporary Credentials'}</span>
+                      </button>
+                    </div>
+
+                    <p className="text-[11px] text-neutral-600 leading-relaxed">
+                      {darajaConfig.simulatorMode
+                        ? 'Simulates instant Safaricom STK Push prompts and receipt issuance without requiring Safaricom approvals.'
+                        : `Ready to dispatch live STK push to Safaricom (${darajaConfig.environment} mode).`}
+                    </p>
+
+                    {/* Expandable Temporary Credentials Config Drawer */}
+                    {showDarajaDrawer && (
+                      <div className="pt-3 border-t border-neutral-200 space-y-3 animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between bg-neutral-100 p-2 text-xs">
+                          <span className="font-bold text-black">Gateway Execution Mode:</span>
+                          <div className="flex gap-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = { ...darajaConfig, simulatorMode: true };
+                                setDarajaConfig(updated);
+                                saveStoredDarajaConfig(updated);
+                              }}
+                              className={`px-2 py-1 text-[11px] font-bold cursor-pointer transition-colors ${
+                                darajaConfig.simulatorMode
+                                  ? 'bg-black text-white'
+                                  : 'bg-white text-neutral-700 hover:text-black'
+                              }`}
+                            >
+                              Simulator (Zero Setup)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = { ...darajaConfig, simulatorMode: false };
+                                setDarajaConfig(updated);
+                                saveStoredDarajaConfig(updated);
+                              }}
+                              className={`px-2 py-1 text-[11px] font-bold cursor-pointer transition-colors ${
+                                !darajaConfig.simulatorMode
+                                  ? 'bg-black text-white'
+                                  : 'bg-white text-neutral-700 hover:text-black'
+                              }`}
+                            >
+                              Custom Daraja Keys
+                            </button>
+                          </div>
+                        </div>
+
+                        {!darajaConfig.simulatorMode && (
+                          <div className="space-y-2 text-xs">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-neutral-700 mb-0.5">
+                                  Consumer Key:
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Paste Daraja Consumer Key..."
+                                  value={darajaConfig.consumerKey}
+                                  onChange={(e) => {
+                                    const updated = { ...darajaConfig, consumerKey: e.target.value };
+                                    setDarajaConfig(updated);
+                                  }}
+                                  className="w-full px-2 py-1 text-xs font-mono border border-neutral-300 bg-white"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-neutral-700 mb-0.5">
+                                  Consumer Secret:
+                                </label>
+                                <input
+                                  type="password"
+                                  placeholder="Paste Consumer Secret..."
+                                  value={darajaConfig.consumerSecret}
+                                  onChange={(e) => {
+                                    const updated = { ...darajaConfig, consumerSecret: e.target.value };
+                                    setDarajaConfig(updated);
+                                  }}
+                                  className="w-full px-2 py-1 text-xs font-mono border border-neutral-300 bg-white"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-neutral-700 mb-0.5">
+                                  Shortcode:
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="174379"
+                                  value={darajaConfig.shortcode}
+                                  onChange={(e) => {
+                                    const updated = { ...darajaConfig, shortcode: e.target.value };
+                                    setDarajaConfig(updated);
+                                  }}
+                                  className="w-full px-2 py-1 text-xs font-mono border border-neutral-300 bg-white"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[10px] font-mono font-bold text-neutral-700 mb-0.5">
+                                  Environment:
+                                </label>
+                                <select
+                                  value={darajaConfig.environment}
+                                  onChange={(e) => {
+                                    const updated = { ...darajaConfig, environment: e.target.value as 'sandbox' | 'production' };
+                                    setDarajaConfig(updated);
+                                  }}
+                                  className="w-full px-2 py-1 text-xs border border-neutral-300 bg-white"
+                                >
+                                  <option value="sandbox">Sandbox (Testing)</option>
+                                  <option value="production">Production (Live)</option>
+                                </select>
+                              </div>
+
+                              <div className="flex items-end">
+                                <button
+                                  type="button"
+                                  onClick={handleTestTemporaryCredentials}
+                                  disabled={testingConnection || !darajaConfig.consumerKey}
+                                  className="w-full py-1.5 text-xs font-bold bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50 cursor-pointer"
+                                >
+                                  {testingConnection ? 'Verifying...' : 'Verify Keys'}
+                                </button>
+                              </div>
+                            </div>
+
+                            {testConnectionNotice && (
+                              <div className={`p-2 text-[11px] font-mono border ${
+                                testConnectionNotice.type === 'success'
+                                  ? 'bg-neutral-50 border-black text-black'
+                                  : 'bg-neutral-100 border-neutral-400 text-black'
+                              }`}>
+                                {testConnectionNotice.message}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -602,20 +835,53 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     </div>
                   )}
 
+                  {/* Pending PIN Status Card */}
                   {stkStatus === 'pending_pin' && (
-                    <div className="p-4 bg-white border-2 border-black flex items-start gap-3 text-xs text-neutral-800">
-                      <Smartphone className="w-5 h-5 text-black shrink-0 mt-0.5 animate-pulse" />
-                      <div className="flex-1">
-                        <div className="font-extrabold text-black text-sm mb-1">
-                          Payment Prompt Sent to Your Phone
-                        </div>
-                        <div className="text-neutral-700 leading-relaxed mb-2 font-medium">
-                          Please unlock your phone ({stkPhone || phoneNumber}) and enter your M-Pesa PIN to authorize <strong>KES {currentFee.toLocaleString()}</strong>.
-                        </div>
-                        <div className="text-[11px] font-mono text-neutral-500 flex items-center gap-1.5">
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Waiting for PIN verification from Safaricom...</span>
-                        </div>
+                    <div className="p-4 bg-emerald-950 text-emerald-50 border-2 border-emerald-600 rounded-lg space-y-3 shadow-md">
+                      <div className="flex items-center justify-between text-xs font-mono">
+                        <span className="flex items-center gap-2 font-bold text-emerald-300">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                          SAFARICOM M-PESA PROMPT ACTIVE
+                        </span>
+                        <span className="bg-emerald-900/80 px-2 py-0.5 rounded text-[10px] font-mono text-emerald-200">
+                          {isSimulatedPrompt ? 'SIMULATOR' : 'LIVE NETWORK'}
+                        </span>
+                      </div>
+
+                      <div className="text-sm font-bold text-white leading-snug">
+                        Prompt dispatched for <span className="text-emerald-400 font-mono">KES {currentFee.toLocaleString()}</span> to <span className="text-white underline">{stkPhone || phoneNumber}</span>
+                      </div>
+
+                      <p className="text-xs text-emerald-200/90 leading-relaxed">
+                        A Class-0 SIM Toolkit prompt has popped up on your screen. Enter your M-Pesa PIN directly in the prompt dialog or on your handset.
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowPromptOverlay(true)}
+                          className="flex-1 py-2.5 px-3 text-xs font-bold bg-[#00843D] hover:bg-emerald-600 text-white rounded transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow"
+                        >
+                          <Smartphone className="w-4 h-4" />
+                          <span>Open SIM Toolkit Prompt Dialog</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await handleSimulateAction('CANCEL');
+                            setShowPromptOverlay(false);
+                            setStkStatus('cancelled');
+                            setStkMessage('Payment was cancelled.');
+                          }}
+                          className="py-2.5 px-3 text-xs font-semibold bg-neutral-900 text-neutral-300 hover:text-white rounded transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+
+                      <div className="text-[11px] font-mono text-emerald-300/80 flex items-center gap-1.5 pt-1">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Awaiting Safaricom M-Pesa PIN authorization...</span>
                       </div>
                     </div>
                   )}
@@ -659,6 +925,18 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                       <div className="text-[11px] font-mono text-neutral-600 bg-neutral-100 p-2.5 border border-neutral-200">
                         {stkErrorDetails}
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = { ...darajaConfig, simulatorMode: true };
+                          setDarajaConfig(updated);
+                          saveStoredDarajaConfig(updated);
+                          setStkStatus('idle');
+                        }}
+                        className="w-full py-2 text-xs font-bold bg-black text-white hover:bg-neutral-800 cursor-pointer"
+                      >
+                        ⚡ Switch to Daraja Sandbox Simulator (Zero Setup)
+                      </button>
                       <p className="text-neutral-700 font-semibold text-xs pt-1">
                         Please complete your payment using the manual Buy Goods Till Number below:
                       </p>
@@ -753,6 +1031,41 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
           </div>
         )}
       </div>
+
+      {/* Safaricom SIM Toolkit STK Push Prompt Dialog */}
+      <SafaricomStkPromptModal
+        isOpen={showPromptOverlay && stkStatus === 'pending_pin'}
+        phoneNumber={stkPhone || phoneNumber}
+        amount={currentFee}
+        checkoutRequestId={checkoutRequestId}
+        isSimulated={isSimulatedPrompt}
+        onConfirm={async (_enteredPin) => {
+          await handleSimulateAction('CONFIRM');
+          // Immediate status check
+          try {
+            const res = await fetch(`/api/mpesa/status/${checkoutRequestId}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.status === 'SUCCESS') {
+                setShowPromptOverlay(false);
+                setStkStatus('success');
+                finalizeBooking({
+                  receiptCode: data.mpesaReceiptNumber || `SK${Date.now().toString().slice(-8)}`,
+                  status: 'Confirmed',
+                });
+              }
+            }
+          } catch {
+            // Poller will catch it
+          }
+        }}
+        onCancel={async () => {
+          setShowPromptOverlay(false);
+          await handleSimulateAction('CANCEL');
+          setStkStatus('cancelled');
+          setStkMessage('The payment request was cancelled on the prompt.');
+        }}
+      />
     </div>
   );
 };

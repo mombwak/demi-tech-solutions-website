@@ -17,6 +17,44 @@ export interface AdminSettings {
   mpesaTill: string;
 }
 
+export interface DarajaTemporaryConfig {
+  consumerKey: string;
+  consumerSecret: string;
+  shortcode: string;
+  passkey: string;
+  environment: 'sandbox' | 'production';
+  simulatorMode: boolean;
+}
+
+const DARAJA_TEMP_KEY = 'demitech_daraja_temp_config_v1';
+
+export const DARAJA_SANDBOX_DEFAULTS: DarajaTemporaryConfig = {
+  consumerKey: '',
+  consumerSecret: '',
+  shortcode: '174379',
+  passkey: 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+  environment: 'sandbox',
+  simulatorMode: true,
+};
+
+export function getStoredDarajaConfig(): DarajaTemporaryConfig {
+  try {
+    const raw = localStorage.getItem(DARAJA_TEMP_KEY);
+    if (!raw) return DARAJA_SANDBOX_DEFAULTS;
+    return { ...DARAJA_SANDBOX_DEFAULTS, ...JSON.parse(raw) };
+  } catch {
+    return DARAJA_SANDBOX_DEFAULTS;
+  }
+}
+
+export function saveStoredDarajaConfig(config: DarajaTemporaryConfig): void {
+  try {
+    localStorage.setItem(DARAJA_TEMP_KEY, JSON.stringify(config));
+  } catch (err) {
+    console.error('Failed to save Daraja config', err);
+  }
+}
+
 const DEFAULT_SETTINGS: AdminSettings = {
   consultationFeeRemote: COMPANY_INFO.consultationFeeRemote,
   consultationFeeLocal: COMPANY_INFO.consultationFeeLocal,

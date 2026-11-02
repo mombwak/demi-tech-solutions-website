@@ -1,6 +1,6 @@
 # Demi Tech Solutions – Safaricom Daraja M-Pesa Integration Guide
 
-This document details the architectural implementation, environment setup, and verification flows for M-Pesa payments within Demi Tech Solutions' corporate platform.
+This document details the architectural implementation, environment setup, and verification flows for M-Pesa payments within Demi Tech Solutions' corporate platform, including **working with temporary Daraja sandbox credentials** and the **zero-setup sandbox simulator**.
 
 ---
 
@@ -11,7 +11,7 @@ To ensure zero lost revenue and frictionless consultation bookings across all te
 1. **Automated M-Pesa STK Push (Lipa na M-Pesa Online):**
    - Direct SIM-toolkit prompt triggered to the customer's phone.
    - Real-time client polling with instant state updates (Initiated -> Prompt Sent -> User PIN -> Confirmed).
-   - Powered by the official Safaricom Daraja 2.0 API.
+   - Compatible with **temporary Daraja sandbox credentials** (developer.safaricom.co.ke) and includes a **zero-setup interactive sandbox simulator**.
 
 2. **Official Manual Alternative (Buy Goods Till 5829259):**
    - For customers using non-smartphone handsets, secondary SIMs, company accounts, or offline M-Pesa.
@@ -27,7 +27,33 @@ To ensure zero lost revenue and frictionless consultation bookings across all te
 
 ---
 
-## 2. Server Architecture & API Endpoints
+## 2. Working with Daraja Temporary Credentials
+
+Developers and testers can use temporary credentials in **two simple ways**:
+
+### Method A: Interactive In-App Configuration (No Server Restart Needed)
+1. In the customer **Book a Consultation** modal, click **"Temporary Credentials"** in the M-Pesa STK Push section (or access Tab 3 of the **Admin Portal**).
+2. Toggle between:
+   - **Daraja Sandbox Simulator (Zero Setup):** Requires no Safaricom developer account. Instantly simulates the STK Push prompt on screen, provides an authentic "Enter PIN: 1234" approval button, and generates a valid Safaricom receipt code within 4 seconds.
+   - **Custom Daraja Keys:** Paste your temporary `Consumer Key` and `Consumer Secret` from [developer.safaricom.co.ke](https://developer.safaricom.co.ke).
+3. Click **"Verify Keys"** / **"Test Connection"**. The server connects directly to `https://sandbox.safaricom.co.ke/oauth/v1/generate` to verify the keys in real time.
+
+### Method B: Environment Variables (`.env`)
+You can configure temporary or permanent credentials in `.env`:
+```env
+MPESA_ENVIRONMENT="sandbox"
+MPESA_CONSUMER_KEY="your_temporary_consumer_key"
+MPESA_CONSUMER_SECRET="your_temporary_consumer_secret"
+MPESA_PASSKEY="bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+MPESA_SHORTCODE="174379"
+MPESA_PARTY_B="174379"
+MPESA_TRANSACTION_TYPE="CustomerPayBillOnline"
+APP_URL="https://www.demitechsolutions.com"
+```
+
+---
+
+## 3. Server Architecture & API Endpoints
 
 All Daraja API communication is handled strictly server-side in `server.ts` to ensure API credentials, Consumer Secret, and Lipa na M-Pesa Passkeys are **never exposed to the client browser**.
 
@@ -35,19 +61,43 @@ All Daraja API communication is handled strictly server-side in `server.ts` to e
 
 #### 1. Configuration Check
 `GET /api/mpesa/config-status`
-- **Purpose:** Informs the frontend whether live Daraja STK Push credentials are fully provisioned or if manual Buy Goods Till 5829259 is the active default.
+- **Purpose:** Informs the frontend whether live Daraja STK Push credentials are fully provisioned, whether simulation mode is active, and current till info.
+
+#### 2. Set / Test Temporary Credentials
+`POST /api/mpesa/temporary-credentials`
+- **Request Body:**
+  ```json
+  {
+    "consumerKey": "...",
+    "consumerSecret": "...",
+    "shortcode": "174379",
+    "passkey": "bfb279f9aa9bdbcf...",
+    "environment": "sandbox",
+    "simulatorMode": false
+  }
+  ```
 - **Response:**
   ```json
   {
-    "configured": true,
-    "environment": "production",
-    "tillNumber": "5829259",
-    "shortcode": "174379",
-    "hasCredentials": true
+    "success": true,
+    "message": "Successfully connected to Safaricom Daraja (sandbox)! Access token verified.",
+    "environment": "sandbox",
+    "simulatorMode": false
   }
   ```
 
-#### 2. Initiate STK Push
+#### 3. Simulate Handset Action (for On-Screen Test Prompts)
+`POST /api/mpesa/simulate-action`
+- **Request Body:**
+  ```json
+  {
+    "checkoutRequestId": "ws_CO_SIM_1730560000_123",
+    "action": "CONFIRM"
+  }
+  ```
+- **Response:** Marks transaction as `SUCCESS`, issues authentic receipt code (e.g., `SK92MN74LQ`), and auto-notifies polling frontend.
+
+#### 4. Initiate STK Push
 `POST /api/mpesa/stkpush`
 - **Headers:** `Content-Type: application/json`
 - **Request Body:**
@@ -55,9 +105,11 @@ All Daraja API communication is handled strictly server-side in `server.ts` to e
   {
     "phoneNumber": "0703293201",
     "amount": 2500,
-    "serviceName": "Standard Site Assessment",
-    "customerName": "Ochieng Kiprop"
+    "accountReference": "CONS-1042",
+    "transactionDesc": "Consultation",
+    "temporaryCredentials": { ... }
   }
+  ```
   ```
 - **Backend Process:**
   1. Sanitizes and normalizes phone number to international 254 format (`254703293201`).

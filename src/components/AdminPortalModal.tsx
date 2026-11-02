@@ -12,7 +12,10 @@ import {
   updateConsultationStatus,
   getAdminSettings,
   saveAdminSettings,
+  getStoredDarajaConfig,
+  saveStoredDarajaConfig,
   AdminSettings,
+  DarajaTemporaryConfig,
 } from '../utils/storage.ts';
 import { TechnicianApplication, ConsultationBooking } from '../types.ts';
 import { KENYA_COUNTIES } from '../data/content.ts';
@@ -30,6 +33,9 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
   const [applications, setApplications] = useState<TechnicianApplication[]>([]);
   const [consultations, setConsultations] = useState<ConsultationBooking[]>([]);
   const [settings, setSettings] = useState<AdminSettings>(getAdminSettings());
+  const [darajaConfig, setDarajaConfig] = useState<DarajaTemporaryConfig>(getStoredDarajaConfig());
+  const [darajaVerifying, setDarajaVerifying] = useState(false);
+  const [darajaNotice, setDarajaNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [filterCounty, setFilterCounty] = useState<string>('All');
   const [filterStatus, setFilterStatus] = useState<string>('All');
   const [selectedApp, setSelectedApp] = useState<TechnicianApplication | null>(null);
@@ -39,6 +45,7 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
     setApplications(getStoredApplications());
     setConsultations(getStoredConsultations());
     setSettings(getAdminSettings());
+    setDarajaConfig(getStoredDarajaConfig());
   };
 
   useEffect(() => {
@@ -62,11 +69,57 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
     refreshData();
   };
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     saveAdminSettings(settings);
+    saveStoredDarajaConfig(darajaConfig);
+
+    // Sync temporary credentials with server
+    try {
+      await fetch('/api/mpesa/temporary-credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(darajaConfig),
+      });
+    } catch {
+      // Ignored if offline
+    }
+
     setSettingsSavedNotice(true);
     setTimeout(() => setSettingsSavedNotice(false), 2500);
+  };
+
+  const testDarajaConnection = async () => {
+    setDarajaVerifying(true);
+    setDarajaNotice(null);
+
+    try {
+      const res = await fetch('/api/mpesa/temporary-credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(darajaConfig),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        saveStoredDarajaConfig(darajaConfig);
+        setDarajaNotice({
+          type: 'success',
+          message: data.message || 'Safaricom Daraja API authenticated successfully!',
+        });
+      } else {
+        setDarajaNotice({
+          type: 'error',
+          message: data.error || 'Failed to authenticate with Safaricom Daraja.',
+        });
+      }
+    } catch (err: any) {
+      setDarajaNotice({
+        type: 'error',
+        message: err.message || 'Network error reaching API endpoint.',
+      });
+    } finally {
+      setDarajaVerifying(false);
+    }
   };
 
   const filteredApplications = applications.filter((app) => {
@@ -520,10 +573,137 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
                 </div>
               </div>
 
+              {/* Daraja STK Push & Temporary Sandbox Gateway Configuration */}
+              <div className="pt-4 border-t border-neutral-200 space-y-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold text-black">
+                      Safaricom Daraja STK Push &amp; Sandbox Setup
+                    </h4>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 font-bold ${
+                      darajaConfig.simulatorMode
+                        ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                        : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                    }`}>
+                      {darajaConfig.simulatorMode ? 'SIMULATOR MODE' : `DARAJA ${darajaConfig.environment.toUpperCase()}`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Configure temporary Daraja Developer credentials or enable instant handset simulation for demonstration and testing.
+                  </p>
+                </div>
+
+                {/* Mode Selector */}
+                <div className="p-3 bg-neutral-50 border border-neutral-200 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-bold text-black">Daraja Simulator Mode (Zero Setup):</div>
+                    <div className="text-[11px] text-neutral-500">
+                      Auto-approves STK push with authentic Safaricom receipts without requiring active credentials.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDarajaConfig({ ...darajaConfig, simulatorMode: !darajaConfig.simulatorMode })}
+                    className={`px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer ${
+                      darajaConfig.simulatorMode
+                        ? 'bg-black text-white'
+                        : 'bg-white border border-neutral-300 text-neutral-700 hover:text-black'
+                    }`}
+                  >
+                    {darajaConfig.simulatorMode ? 'Enabled' : 'Disabled'}
+                  </button>
+                </div>
+
+                {/* Real / Temporary Credentials Inputs */}
+                <div className="space-y-3 p-4 bg-white border border-neutral-200">
+                  <div className="text-xs font-bold text-black uppercase tracking-wider">
+                    Temporary Daraja API Keys (Safaricom Developer Portal):
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-mono font-bold text-neutral-700 mb-1">
+                        Consumer Key:
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Paste Daraja Consumer Key..."
+                        value={darajaConfig.consumerKey}
+                        onChange={(e) => setDarajaConfig({ ...darajaConfig, consumerKey: e.target.value })}
+                        className="w-full px-3 py-2 text-xs font-mono border border-neutral-300 focus:border-black focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-mono font-bold text-neutral-700 mb-1">
+                        Consumer Secret:
+                      </label>
+                      <input
+                        type="password"
+                        placeholder="Paste Consumer Secret..."
+                        value={darajaConfig.consumerSecret}
+                        onChange={(e) => setDarajaConfig({ ...darajaConfig, consumerSecret: e.target.value })}
+                        className="w-full px-3 py-2 text-xs font-mono border border-neutral-300 focus:border-black focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-mono font-bold text-neutral-700 mb-1">
+                        Shortcode:
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="174379"
+                        value={darajaConfig.shortcode}
+                        onChange={(e) => setDarajaConfig({ ...darajaConfig, shortcode: e.target.value })}
+                        className="w-full px-3 py-2 text-xs font-mono border border-neutral-300 focus:border-black focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-mono font-bold text-neutral-700 mb-1">
+                        Environment:
+                      </label>
+                      <select
+                        value={darajaConfig.environment}
+                        onChange={(e) => setDarajaConfig({ ...darajaConfig, environment: e.target.value as 'sandbox' | 'production' })}
+                        className="w-full px-3 py-2 text-xs border border-neutral-300 focus:border-black focus:outline-none"
+                      >
+                        <option value="sandbox">Sandbox (Testing)</option>
+                        <option value="production">Production (Live)</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        onClick={testDarajaConnection}
+                        disabled={darajaVerifying || !darajaConfig.consumerKey}
+                        className="w-full py-2 text-xs font-bold bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50 cursor-pointer"
+                      >
+                        {darajaVerifying ? 'Testing...' : 'Test Connection'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {darajaNotice && (
+                    <div className={`p-2.5 text-xs font-mono border ${
+                      darajaNotice.type === 'success'
+                        ? 'bg-neutral-50 border-black text-black font-semibold'
+                        : 'bg-neutral-100 border-neutral-400 text-black'
+                    }`}>
+                      {darajaNotice.message}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {settingsSavedNotice && (
                 <div className="p-3 bg-neutral-900 text-white text-xs font-mono flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-white" />
-                  <span>Administrative settings updated successfully.</span>
+                  <span>Administrative and Daraja settings updated successfully.</span>
                 </div>
               )}
 
