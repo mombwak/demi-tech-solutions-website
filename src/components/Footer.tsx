@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { PageView } from '../types.ts';
 import { COMPANY_INFO, CORE_DIVISIONS } from '../data/content.ts';
 import { ArrowUpRight, Phone, Mail, MapPin, ShieldCheck, Lock } from 'lucide-react';
+import { getPageUrl } from '../utils/navigation.ts';
 
 interface FooterProps {
   onNavigate: (page: PageView) => void;
@@ -41,14 +42,22 @@ export const Footer: React.FC<FooterProps> = ({
   ];
 
   return (
-    <footer className="bg-black text-white pt-16 pb-12 border-t border-neutral-800">
+    <footer role="contentinfo" className="bg-black text-white pt-16 pb-12 border-t border-neutral-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Tier: Wordmark & Core CTA */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between pb-12 mb-12 border-b border-neutral-800 gap-8">
           <div className="max-w-2xl">
-            <div className="text-xl sm:text-2xl font-extrabold tracking-tight text-white mb-2">
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNav('home');
+              }}
+              aria-label="Demi Tech Solutions Home"
+              className="text-xl sm:text-2xl font-extrabold tracking-tight text-white mb-2 block hover:opacity-90"
+            >
               DEMI TECH SOLUTIONS
-            </div>
+            </a>
             <div className="text-xs font-mono tracking-widest text-neutral-400 uppercase mb-3">
               ENGINEERING INTELLIGENT TECHNOLOGY SYSTEMS.
             </div>
@@ -60,6 +69,7 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="flex flex-wrap items-center gap-4">
             <button
               onClick={onOpenConsultation}
+              aria-label="Book a Professional Consultation"
               className="px-6 py-3.5 text-xs font-bold tracking-wider text-black bg-white hover:bg-neutral-200 transition-colors cursor-pointer flex items-center gap-2"
             >
               <span>BOOK A CONSULTATION</span>
@@ -69,6 +79,7 @@ export const Footer: React.FC<FooterProps> = ({
               href={COMPANY_INFO.whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Chat with Demi Tech Solutions WhatsApp Desk"
               className="px-6 py-3.5 text-xs font-bold tracking-wider text-white bg-neutral-900 border border-neutral-700 hover:bg-neutral-800 transition-colors flex items-center gap-2"
             >
               <span>WHATSAPP DESK</span>
@@ -80,76 +91,133 @@ export const Footer: React.FC<FooterProps> = ({
         {/* 4-Column Grid: Solutions, Navigation, Service Footprint, Contacts */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 mb-12 border-b border-neutral-800 text-xs">
           {/* Col 1: Solutions */}
-          <div>
+          <nav aria-label="Footer Divisions Navigation">
             <div className="text-[11px] font-mono uppercase tracking-widest text-neutral-400 font-bold mb-4">
               Core Divisions
             </div>
             <ul className="space-y-2.5 text-neutral-300">
               {CORE_DIVISIONS.map((div) => (
                 <li key={div.id}>
-                  <button
-                    onClick={() => handleNav('solutions')}
-                    className="hover:text-white transition-colors text-left"
+                  <a
+                    href={getPageUrl('solutions')}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNav('solutions');
+                    }}
+                    className="hover:text-white transition-colors block text-left"
                   >
                     Division {div.number}: {div.title}
-                  </button>
+                  </a>
                 </li>
               ))}
               <li className="pt-2">
-                <button
-                  onClick={() => handleNav('technician-network')}
-                  className="text-neutral-400 hover:text-white font-semibold transition-colors flex items-center gap-1.5"
+                <a
+                  href={getPageUrl('technician-network')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('technician-network');
+                  }}
+                  className="text-neutral-400 hover:text-white font-semibold transition-colors inline-flex items-center gap-1.5"
                 >
                   <span>Technician Network Onboarding</span>
                   <ArrowUpRight className="w-3 h-3" />
-                </button>
+                </a>
               </li>
             </ul>
-          </div>
+          </nav>
 
           {/* Col 2: Navigation */}
-          <div>
+          <nav aria-label="Footer Company Navigation">
             <div className="text-[11px] font-mono uppercase tracking-widest text-neutral-400 font-bold mb-4">
               Company
             </div>
             <ul className="space-y-2.5 text-neutral-300">
               <li>
-                <button onClick={() => handleNav('home')} className="hover:text-white transition-colors">
+                <a
+                  href={getPageUrl('home')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('home');
+                  }}
+                  className="hover:text-white transition-colors block"
+                >
                   Home Overview
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => handleNav('about')} className="hover:text-white transition-colors">
+                <a
+                  href={getPageUrl('about')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('about');
+                  }}
+                  className="hover:text-white transition-colors block"
+                >
                   About Our Engineering
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => handleNav('solutions')} className="hover:text-white transition-colors">
+                <a
+                  href={getPageUrl('solutions')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('solutions');
+                  }}
+                  className="hover:text-white transition-colors block"
+                >
                   Integrated Solutions
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => handleNav('projects')} className="hover:text-white transition-colors">
+                <a
+                  href={getPageUrl('projects')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('projects');
+                  }}
+                  className="hover:text-white transition-colors block"
+                >
                   Projects & Case Studies
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => handleNav('insights')} className="hover:text-white transition-colors">
+                <a
+                  href={getPageUrl('insights')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('insights');
+                  }}
+                  className="hover:text-white transition-colors block"
+                >
                   Insights & Knowledge Base
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => handleNav('technician-network')} className="hover:text-white transition-colors">
+                <a
+                  href={getPageUrl('technician-network')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('technician-network');
+                  }}
+                  className="hover:text-white transition-colors block"
+                >
                   Join Technician Network
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => handleNav('contact')} className="hover:text-white transition-colors">
+                <a
+                  href={getPageUrl('contact')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('contact');
+                  }}
+                  className="hover:text-white transition-colors block"
+                >
                   Contact & Office Info
-                </button>
+                </a>
               </li>
             </ul>
-          </div>
+          </nav>
 
           {/* Col 3: Service Areas */}
           <div>

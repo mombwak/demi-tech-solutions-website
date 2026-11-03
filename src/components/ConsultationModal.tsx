@@ -84,6 +84,17 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     };
   }, []);
 
+  // Accessibility: Close modal on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const currentFee =
@@ -373,7 +384,12 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="consultation-modal-title"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+    >
       <div className="bg-white max-w-2xl w-full my-8 border border-neutral-300 shadow-2xl overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="bg-black text-white p-5 sm:p-6 flex items-start justify-between">
@@ -381,7 +397,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
             <div className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase mb-1">
               Demi Tech Solutions · Engineering Appointment
             </div>
-            <h3 className="text-xl font-extrabold tracking-tight">
+            <h3 id="consultation-modal-title" className="text-xl font-extrabold tracking-tight">
               Book a Professional Consultation
             </h3>
             <p className="text-xs text-neutral-400 mt-1">

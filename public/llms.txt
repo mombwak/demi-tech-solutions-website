@@ -1,0 +1,55 @@
+# Demi Tech Solutions – Engineering Intelligent Technology Systems
+> Official Agentic & LLM Context File for https://www.demitechsolutions.com
+> Last Updated: 2026-11-02
+
+## Executive Summary
+Demi Tech Solutions is a premier technology engineering and systems integration company based in Kisumu, Kenya, serving enterprises, commercial clients, institutions, and properties across Western Kenya (Kisumu, Kakamega, Bungoma, Busia, Siaya, Homa Bay, Migori, Kisii, Eldoret) and nationwide.
+
+We specialise in high-reliability physical and digital technology systems:
+1. Commercial Security Engineering & CCTV (Hikvision, Dahua, Nemtek perimeter defense, biometric access control).
+2. Business Automation & Point of Sale (POS systems, ERPNext, Dolibarr ERP, KRA eTIMS automated tax compliance, Safaricom Daraja M-Pesa).
+3. Enterprise Technology & IT Infrastructure (Cat6A structured cabling, MikroTik routing, Ubiquiti UniFi high-density Wi-Fi, Hospital EMR/HMIS software, Starlink Business satellite internet).
+4. Power Resilience & Energy (LiFePO4 lithium batteries, commercial solar hybrid inverters, online double-conversion UPS systems).
+5. National Independent Technician Partner Network (verified installers across all 47 Kenyan counties).
+
+## Canonical Pages & Usable Links
+- Home Overview: https://www.demitechsolutions.com/
+- About Engineering: https://www.demitechsolutions.com/about
+- Core Solutions & Divisions: https://www.demitechsolutions.com/solutions
+- Engineering Projects & Case Studies: https://www.demitechsolutions.com/projects
+- Technical Insights & Guides: https://www.demitechsolutions.com/insights
+- Join Technician Network: https://www.demitechsolutions.com/technician-network
+- Contact Engineering Desk: https://www.demitechsolutions.com/contact
+
+## Consultation & Commercial Services
+Demi Tech Solutions offers structured technical consultations:
+- Standard Remote Architectural Consultation: KES 2,500
+- Comprehensive On-Site Engineering Survey (Kisumu & Western Kenya): KES 5,000
+
+## Official Payment Methods
+### 1. Automated M-Pesa STK Push (Lipa na M-Pesa Online)
+- Customers enter their Safaricom M-Pesa phone number on the booking form.
+- An instantaneous payment prompt is dispatched to their phone.
+- Verified in real-time via Safaricom Daraja API.
+
+### 2. Manual Payment Alternative (M-Pesa Buy Goods)
+- Payment Method: M-Pesa Buy Goods
+- Till Number: 5829259
+- Exact Instructions: "Pay via M-Pesa Buy Goods Till Number: 5829259."
+- Enter the consultation amount and confirm with M-Pesa PIN.
+
+## Contact Information
+- Legal Name: Demi Tech Solutions
+- Headquarters: Kisumu, Kenya
+- Primary Telephone: +254 703 293 201
+- WhatsApp Direct Desk: https://wa.me/254703293201?text=Hello%20Demi%20Tech%20Solutions%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20professional%20consultation.
+- Email: info@demitechsolutions.com / contact@demitechsolutions.com
+- Hours: Monday - Saturday: 08:00 - 18:00 EAT (24/7 SLA emergency line available for enterprise clients)
+
+## Programmatic & API Endpoints for AI Agents
+- M-Pesa Configuration Status: GET /api/mpesa/config-status
+- M-Pesa STK Push Initiation: POST /api/mpesa/stkpush (payload: { phoneNumber, amount, accountReference, transactionDesc })
+- M-Pesa Transaction Status Check: GET /api/mpesa/status/:id
+- Deployment Archive Package: GET /public_html_deployment
+- Machine-Readable Discovery: GET /llms.txt
+- XML Sitemap: GET /sitemap.xml

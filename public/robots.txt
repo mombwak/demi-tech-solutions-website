@@ -1,4 +1,22 @@
 User-agent: *
 Allow: /
+Allow: /llms.txt
+Allow: /sitemap.xml
+
+# Explicitly welcome Search & Agentic AI crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
 
 Sitemap: https://www.demitechsolutions.com/sitemap.xml

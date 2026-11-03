@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { PageView } from './types.ts';
+import { getPageFromLocation, updateBrowserUrl } from './utils/navigation.ts';
 import { Header } from './components/Header.tsx';
 import { Hero } from './components/Hero.tsx';
 import { CompanyIntro } from './components/CompanyIntro.tsx';
@@ -32,31 +33,50 @@ const AdminPortalModal = lazy(() =>
 );
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<PageView>('home');
+  const [currentPage, setCurrentPage] = useState<PageView>(() => getPageFromLocation());
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
   const [technicianModalOpen, setTechnicianModalOpen] = useState(false);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
 
-  // Sync browser back/forward buttons or hash if needed
+  // Sync browser back/forward buttons, clean URLs, and deep links
   useEffect(() => {
-    const handleHash = () => {
-      const hash = window.location.hash.replace('#', '') as PageView;
-      if (['home', 'about', 'solutions', 'projects', 'insights', 'technician-network', 'contact'].includes(hash)) {
-        setCurrentPage(hash);
+    const syncRoute = () => {
+      const resolvedPage = getPageFromLocation();
+      setCurrentPage(resolvedPage);
+
+      // Deep link to consultation modal if requested in URL
+      if (
+        window.location.search.includes('consultation=open') ||
+        window.location.hash === '#consultation'
+      ) {
+        setConsultationModalOpen(true);
       }
     };
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+
+    window.addEventListener('popstate', syncRoute);
+    window.addEventListener('hashchange', syncRoute);
+    return () => {
+      window.removeEventListener('popstate', syncRoute);
+      window.removeEventListener('hashchange', syncRoute);
+    };
   }, []);
 
   const handleNavigate = (page: PageView) => {
     setCurrentPage(page);
-    window.location.hash = page === 'home' ? '' : page;
+    updateBrowserUrl(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 flex flex-col font-sans antialiased selection:bg-black selection:text-white">
+      {/* Accessibility: Skip to Main Content Link for screen readers & keyboard navigation */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2.5 focus:bg-black focus:text-white focus:text-xs focus:font-bold focus:shadow-xl focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       {/* Sticky Architectural Header */}
       <Header
         currentPage={currentPage}
@@ -64,8 +84,8 @@ export default function App() {
         onOpenConsultation={() => setConsultationModalOpen(true)}
       />
 
-      {/* Main Content Area Routed by PageView */}
-      <main className="flex-1">
+      {/* Main Content Area Routed by PageView with accessible landmark */}
+      <main id="main-content" role="main" tabIndex={-1} className="flex-1 focus:outline-none">
         {currentPage === 'home' && (
           <>
             <Hero

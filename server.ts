@@ -722,6 +722,7 @@ async function startServer() {
   const isProduction = process.env.NODE_ENV === 'production';
 
   if (!isProduction) {
+    app.use(express.static(path.resolve(__dirname, 'public')));
     const { createServer } = await import('vite');
     const vite = await createServer({
       server: { middlewareMode: true },

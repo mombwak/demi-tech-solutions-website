@@ -176,15 +176,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleGeneralSubmit} className="space-y-4">
+              <form onSubmit={handleGeneralSubmit} aria-label="Project Technical Enquiry Form" className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-black mb-1">
+                    <label htmlFor="contact-name" className="block text-xs font-bold text-black mb-1">
                       Your Name / Contact Person *
                     </label>
                     <input
+                      id="contact-name"
                       type="text"
                       required
+                      aria-required="true"
                       placeholder="e.g. Kelvin Otieno"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -193,12 +195,14 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-black mb-1">
+                    <label htmlFor="contact-phone" className="block text-xs font-bold text-black mb-1">
                       Telephone Number *
                     </label>
                     <input
+                      id="contact-phone"
                       type="tel"
                       required
+                      aria-required="true"
                       placeholder="e.g. +254 700 000000"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
@@ -209,10 +213,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-black mb-1">
+                    <label htmlFor="contact-email" className="block text-xs font-bold text-black mb-1">
                       Email Address (Optional)
                     </label>
                     <input
+                      id="contact-email"
                       type="email"
                       placeholder="e.g. name@organisation.co.ke"
                       value={email}
@@ -222,10 +227,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-black mb-1">
+                    <label htmlFor="contact-county" className="block text-xs font-bold text-black mb-1">
                       Site County
                     </label>
                     <select
+                      id="contact-county"
                       value={county}
                       onChange={(e) => setCounty(e.target.value)}
                       className="w-full px-3 py-2 text-xs border border-neutral-300 bg-white focus:border-black focus:outline-none"
@@ -238,11 +244,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-black mb-1">
+                  <label htmlFor="contact-message" className="block text-xs font-bold text-black mb-1">
                     Describe Your System Requirements *
                   </label>
                   <textarea
+                    id="contact-message"
                     required
+                    aria-required="true"
                     rows={4}
                     placeholder="Provide details about your site, number of buildings, security requirements, POS needs, or current technical challenges..."
                     value={message}
@@ -253,6 +261,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
                 <button
                   type="submit"
+                  aria-label="Send Project Inquiry"
                   className="w-full py-4 text-xs font-bold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
                   <span>SEND PROJECT INQUIRY</span>
