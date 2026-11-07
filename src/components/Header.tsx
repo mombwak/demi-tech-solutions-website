@@ -28,7 +28,9 @@ export const Header: React.FC<HeaderProps> = ({
     { label: 'SOLUTIONS', page: 'solutions' },
     { label: 'PROJECTS', page: 'projects' },
     { label: 'INSIGHTS', page: 'insights' },
-    { label: 'TECHNICIAN NETWORK', page: 'technician-network' },
+    { label: 'INVESTORS', page: 'investors' },
+    { label: 'PROPOSALS', page: 'proposals' },
+    { label: 'NETWORK', page: 'technician-network' },
     { label: 'CONTACT', page: 'contact' },
   ];
 
@@ -41,8 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header role="banner" className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 gap-8">
-          {/* Zone 1: Single text element wordmark with semantic home hyperlink */}
+        <div className="flex items-center justify-between h-20 gap-6">
+          {/* Zone 1: Active Logo & Corporate Wordmark */}
           <a
             href="/"
             onClick={(e) => {
@@ -50,13 +52,27 @@ export const Header: React.FC<HeaderProps> = ({
               handleNavClick('home');
             }}
             aria-label="Demi Tech Solutions Home"
-            className="text-left text-lg sm:text-xl font-extrabold tracking-tight text-black hover:opacity-85 transition-opacity whitespace-nowrap shrink-0"
+            className="flex items-center gap-3 text-left hover:opacity-85 transition-opacity whitespace-nowrap shrink-0 group"
           >
-            DEMI TECH SOLUTIONS
+            <img
+              src="/assets/logo.png"
+              alt="Demi Tech Solutions Logo"
+              width={40}
+              height={40}
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-md shadow-sm border border-neutral-200"
+            />
+            <div className="flex flex-col">
+              <span className="text-base sm:text-lg font-extrabold tracking-tight text-black leading-none">
+                DEMI TECH SOLUTIONS
+              </span>
+              <span className="text-[9px] font-mono tracking-widest text-neutral-500 uppercase mt-0.5">
+                Engineering Systems
+              </span>
+            </div>
           </a>
 
           {/* Zone 2: Navigation Links (semantic URLs for search crawlers & AI agents) */}
-          <nav role="navigation" aria-label="Main Desktop Navigation" className="hidden xl:flex items-center gap-7 text-xs font-semibold tracking-wider text-neutral-700">
+          <nav role="navigation" aria-label="Main Desktop Navigation" className="hidden xl:flex items-center gap-5 text-xs font-semibold tracking-wider text-neutral-700">
             {navLinks.map((link) => {
               const isActive = currentPage === link.page;
               return (

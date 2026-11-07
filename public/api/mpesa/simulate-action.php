@@ -12,6 +12,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+// Enterprise Security: Block simulation if explicitly disabled or in production mode
+if (getenv('ALLOW_SIMULATION') === 'false' || file_exists(__DIR__ . '/.production_lock')) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Simulation endpoint is disabled in production environment. Live Safaricom Daraja callback required.'
+    ]);
+    exit;
+}
+
 $rawInput = file_get_contents('php://input');
 $input = json_decode($rawInput, true) ?? [];
 

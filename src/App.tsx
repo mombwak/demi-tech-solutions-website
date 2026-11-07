@@ -18,6 +18,8 @@ import { IndustriesSection } from './components/IndustriesSection.tsx';
 import { AboutSection } from './components/AboutSection.tsx';
 import { InsightsSection } from './components/InsightsSection.tsx';
 import { ContactSection } from './components/ContactSection.tsx';
+import { InvestorsSection } from './components/InvestorsSection.tsx';
+import { ProposalRequestSection } from './components/ProposalRequestSection.tsx';
 import { Footer } from './components/Footer.tsx';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton.tsx';
 
@@ -190,6 +192,34 @@ export default function App() {
           <>
             <TechnicianNetworkSection
               onOpenApplication={() => setTechnicianModalOpen(true)}
+            />
+            <ConsultationSection
+              onOpenConsultation={() => setConsultationModalOpen(true)}
+            />
+            <ContactSection
+              onOpenConsultation={() => setConsultationModalOpen(true)}
+            />
+          </>
+        )}
+
+        {currentPage === 'investors' && (
+          <>
+            <InvestorsSection
+              onOpenConsultation={() => setConsultationModalOpen(true)}
+            />
+            <ConsultationSection
+              onOpenConsultation={() => setConsultationModalOpen(true)}
+            />
+            <ContactSection
+              onOpenConsultation={() => setConsultationModalOpen(true)}
+            />
+          </>
+        )}
+
+        {currentPage === 'proposals' && (
+          <>
+            <ProposalRequestSection
+              onOpenConsultation={() => setConsultationModalOpen(true)}
             />
             <ConsultationSection
               onOpenConsultation={() => setConsultationModalOpen(true)}

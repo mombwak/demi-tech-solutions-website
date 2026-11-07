@@ -54,9 +54,18 @@ export const Footer: React.FC<FooterProps> = ({
                 handleNav('home');
               }}
               aria-label="Demi Tech Solutions Home"
-              className="text-xl sm:text-2xl font-extrabold tracking-tight text-white mb-2 block hover:opacity-90"
+              className="flex items-center gap-3 mb-3 hover:opacity-90 transition-opacity"
             >
-              DEMI TECH SOLUTIONS
+              <img
+                src="/assets/logo.png"
+                alt="Demi Tech Solutions Logo"
+                width={40}
+                height={40}
+                className="w-10 h-10 object-contain rounded-md border border-neutral-700 bg-neutral-950"
+              />
+              <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-white block">
+                DEMI TECH SOLUTIONS
+              </span>
             </a>
             <div className="text-xs font-mono tracking-widest text-neutral-400 uppercase mb-3">
               ENGINEERING INTELLIGENT TECHNOLOGY SYSTEMS.
@@ -190,6 +199,30 @@ export const Footer: React.FC<FooterProps> = ({
                   className="hover:text-white transition-colors block"
                 >
                   Insights & Knowledge Base
+                </a>
+              </li>
+              <li>
+                <a
+                  href={getPageUrl('investors')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('investors');
+                  }}
+                  className="hover:text-white transition-colors block"
+                >
+                  Investors & Strategic Partners
+                </a>
+              </li>
+              <li>
+                <a
+                  href={getPageUrl('proposals')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNav('proposals');
+                  }}
+                  className="hover:text-white transition-colors block"
+                >
+                  Request Engineering Proposal
                 </a>
               </li>
               <li>

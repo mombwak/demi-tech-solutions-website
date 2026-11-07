@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConsultationBooking, TechnicianApplication } from '../types.ts';
+import { ConsultationBooking, TechnicianApplication, InvestorEnquiry, EngineeringProposalRequest } from '../types.ts';
 import { COMPANY_INFO } from '../data/content.ts';
 
 const CONSULTATIONS_KEY = 'demitech_consultations_v1';
 const APPLICATIONS_KEY = 'demitech_applications_v1';
+const INVESTORS_KEY = 'demitech_investors_v1';
+const PROPOSALS_KEY = 'demitech_proposals_v1';
 const SETTINGS_KEY = 'demitech_admin_settings_v1';
 
 export interface AdminSettings {
@@ -203,5 +205,43 @@ export function saveAdminSettings(settings: AdminSettings): void {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   } catch (err) {
     console.error('Failed to save admin settings', err);
+  }
+}
+
+export function getStoredInvestorEnquiries(): InvestorEnquiry[] {
+  try {
+    const raw = localStorage.getItem(INVESTORS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveInvestorEnquiry(enquiry: InvestorEnquiry): void {
+  try {
+    const current = getStoredInvestorEnquiries();
+    const updated = [enquiry, ...current];
+    localStorage.setItem(INVESTORS_KEY, JSON.stringify(updated));
+  } catch (err) {
+    console.error('Failed to save investor enquiry', err);
+  }
+}
+
+export function getStoredProposalRequests(): EngineeringProposalRequest[] {
+  try {
+    const raw = localStorage.getItem(PROPOSALS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveProposalRequest(proposal: EngineeringProposalRequest): void {
+  try {
+    const current = getStoredProposalRequests();
+    const updated = [proposal, ...current];
+    localStorage.setItem(PROPOSALS_KEY, JSON.stringify(updated));
+  } catch (err) {
+    console.error('Failed to save proposal request', err);
   }
 }

@@ -26,15 +26,23 @@ $resultDesc = 'Payment received and verified successfully.';
 
 if (file_exists($tmpFile)) {
     $data = json_decode(@file_get_contents($tmpFile), true);
-    if (isset($data['status'])) {
+    if (!empty($data['status'])) {
         $status = $data['status'];
+    }
+    if (!empty($data['mpesaReceiptNumber'])) {
+        $receipt = $data['mpesaReceiptNumber'];
+    } elseif (!empty($data['receipt'])) {
+        $receipt = $data['receipt'];
+    }
+    if (!empty($data['resultDesc'])) {
+        $resultDesc = $data['resultDesc'];
     }
 }
 
 echo json_encode([
     'success' => true,
     'status' => $status,
-    'resultCode' => $status === 'SUCCESS' ? 0 : 1032,
+    'resultCode' => $status === 'SUCCESS' ? 0 : ($status === 'CANCELLED' ? 1032 : 1),
     'resultDesc' => $resultDesc,
     'mpesaReceiptNumber' => $receipt,
     'checkoutRequestId' => $checkoutId

@@ -56,6 +56,20 @@ export const ROUTES: Record<PageView, RouteConfig> = {
     title: 'Join Technician Network – Demi Tech Solutions Kenya',
     description: 'Independent verified installer and technician onboarding across all 47 counties in Kenya for security, telematics, networking, and POS systems.',
   },
+  investors: {
+    page: 'investors',
+    path: '/investors',
+    hash: '#investors',
+    title: 'Investors & Strategic Partners – Demi Tech Solutions Kenya',
+    description: 'Strategic technology partnerships, equipment manufacturer distribution, infrastructure investment, and enterprise expansion opportunities across Kenya.',
+  },
+  proposals: {
+    page: 'proposals',
+    path: '/proposals',
+    hash: '#proposals',
+    title: 'Request an Engineering Proposal – Demi Tech Solutions',
+    description: 'Submit technical specifications for large-scale commercial security, hospital HMIS, enterprise networking, and solar backup installations across Kenya.',
+  },
   contact: {
     page: 'contact',
     path: '/contact',

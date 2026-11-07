@@ -28,6 +28,15 @@ if os.path.exists('public/assets/images'):
 if os.path.exists('public/.htaccess'):
     shutil.copy2('public/.htaccess', os.path.join(dist_dir, '.htaccess'))
 
+# Ensure db schema is included in dist
+if os.path.exists('db/schema.sql'):
+    os.makedirs(os.path.join(dist_dir, 'db'), exist_ok=True)
+    shutil.copy2('db/schema.sql', os.path.join(dist_dir, 'db', 'schema.sql'))
+
+# Ensure native PHP API endpoints in public/api are copied to dist/api
+if os.path.exists('public/api'):
+    shutil.copytree('public/api', os.path.join(dist_dir, 'api'), dirs_exist_ok=True)
+
 print(f"Creating fresh archive {output_zip} from {dist_dir}...")
 
 with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:

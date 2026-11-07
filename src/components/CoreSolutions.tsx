@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { CORE_DIVISIONS } from '../data/content.ts';
 import { SolutionDivisionId } from '../types.ts';
-import { ArrowUpRight, Check, ArrowRight, Shield, Cpu, Network, Zap } from 'lucide-react';
+import { ArrowUpRight, Check, ArrowRight, Shield, Cpu, Network, Zap, Compass } from 'lucide-react';
 
 interface CoreSolutionsProps {
   initialDivision?: SolutionDivisionId;
@@ -33,6 +33,8 @@ export const CoreSolutions: React.FC<CoreSolutionsProps> = ({
         return <Network className="w-4 h-4" />;
       case 'power':
         return <Zap className="w-4 h-4" />;
+      case 'consulting':
+        return <Compass className="w-4 h-4" />;
     }
   };
 
@@ -48,12 +50,12 @@ export const CoreSolutions: React.FC<CoreSolutionsProps> = ({
             INTEGRATED TECHNOLOGY SOLUTIONS
           </h2>
           <p className="text-base text-neutral-600 leading-relaxed">
-            We structure our capabilities across four disciplined divisions, ensuring every aspect of your security, business systems, IT connectivity, and electrical continuity operates reliably.
+            We structure our capabilities across five disciplined engineering divisions, ensuring every aspect of your physical security, enterprise software, IT connectivity, electrical continuity, and strategic integration operates reliably.
           </p>
         </div>
 
         {/* Division Tab Switcher (Segmented functional controls) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-1.5 bg-neutral-100 mb-12 border border-neutral-200">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 p-1.5 bg-neutral-100 mb-12 border border-neutral-200">
           {CORE_DIVISIONS.map((division) => {
             const isActive = activeDivisionId === division.id;
             return (

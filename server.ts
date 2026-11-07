@@ -7,6 +7,7 @@ import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
 // Load environment variables
@@ -159,6 +160,168 @@ function generateMpesaReceiptCode(): string {
 }
 
 // -----------------------------------------------------------------------------
+// Administrator Authentication, Brute-Force Rate Limiting & Audit Logging
+// -----------------------------------------------------------------------------
+
+interface AdminSession {
+  token: string;
+  username: string;
+  expiresAt: number;
+  ip: string;
+  createdAt: number;
+}
+
+const adminSessions = new Map<string, AdminSession>();
+const adminLoginAttempts = new Map<string, { count: number; lockedUntil: number }>();
+
+const DEFAULT_ADMIN_USER = process.env.ADMIN_USERNAME || 'admin_demitech';
+// Pre-calculated SHA-256 hash for 'DemiTech@2026!Sec'
+const DEFAULT_PASS_HASH = crypto.createHash('sha256').update('DemiTech@2026!Sec').digest('hex');
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || DEFAULT_PASS_HASH;
+
+function hashAdminPassword(pass: string): string {
+  return crypto.createHash('sha256').update(pass).digest('hex');
+}
+
+// Clean up expired sessions periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, session] of adminSessions.entries()) {
+    if (session.expiresAt < now) {
+      adminSessions.delete(token);
+    }
+  }
+}, 15 * 60 * 1000);
+
+// Authentication Middleware for Protected Endpoints
+function requireAdminAuth(req: Request, res: Response, next: () => void) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+
+  if (!token) {
+    res.status(401).json({ success: false, error: 'Unauthorized: Admin authentication token required' });
+    return;
+  }
+
+  const session = adminSessions.get(token);
+  if (!session || session.expiresAt < Date.now()) {
+    if (session) adminSessions.delete(token);
+    res.status(401).json({ success: false, error: 'Session expired or invalid. Please re-authenticate.' });
+    return;
+  }
+
+  // Slide expiration (extend by 30 mins upon activity, up to 4 hours max)
+  session.expiresAt = Math.min(session.expiresAt + 30 * 60 * 1000, Date.now() + 4 * 60 * 60 * 1000);
+  next();
+}
+
+// Admin Login Endpoint with Rate Limiting (5 failed attempts = 15m lockout)
+app.post('/api/admin/login', (req: Request, res: Response): void => {
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+
+  const attemptData = adminLoginAttempts.get(ip);
+  if (attemptData && attemptData.lockedUntil > now) {
+    const minutesLeft = Math.ceil((attemptData.lockedUntil - now) / 60000);
+    res.status(429).json({
+      success: false,
+      error: `Too many failed login attempts. Terminal locked for security. Please retry in ${minutesLeft} minutes.`,
+    });
+    return;
+  }
+
+  const { username, password } = req.body || {};
+
+  if (!username || !password) {
+    res.status(400).json({ success: false, error: 'Username and password are required' });
+    return;
+  }
+
+  const inputHash = hashAdminPassword(String(password).trim());
+  const validUser = String(username).trim() === DEFAULT_ADMIN_USER;
+  const validPass = inputHash === ADMIN_PASSWORD_HASH;
+
+  if (!validUser || !validPass) {
+    const currentCount = (attemptData?.count || 0) + 1;
+    let lockedUntil = 0;
+    if (currentCount >= 5) {
+      lockedUntil = now + 15 * 60 * 1000; // 15 minutes lockout
+      console.warn(`[Security Alert] IP ${ip} locked out after 5 consecutive failed admin login attempts.`);
+    }
+    adminLoginAttempts.set(ip, { count: currentCount, lockedUntil });
+
+    res.status(401).json({
+      success: false,
+      error: 'Invalid administrator credentials. Access denied.',
+      remainingAttempts: Math.max(0, 5 - currentCount),
+    });
+    return;
+  }
+
+  // Clear failed attempts on success
+  adminLoginAttempts.delete(ip);
+
+  // Generate high-entropy 256-bit cryptographically secure session token
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = now + 2 * 60 * 60 * 1000; // 2 hours
+
+  adminSessions.set(token, {
+    token,
+    username: DEFAULT_ADMIN_USER,
+    expiresAt,
+    ip,
+    createdAt: now,
+  });
+
+  console.log(`[Admin Security] Administrator '${DEFAULT_ADMIN_USER}' authenticated successfully from ${ip}`);
+
+  res.json({
+    success: true,
+    message: 'Authentication successful',
+    token,
+    username: DEFAULT_ADMIN_USER,
+    role: 'SUPER_ADMIN',
+    expiresAt,
+  });
+});
+
+// Admin Session Verification Endpoint
+app.get('/api/admin/verify-session', (req: Request, res: Response): void => {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+
+  if (!token) {
+    res.json({ authenticated: false });
+    return;
+  }
+
+  const session = adminSessions.get(token);
+  if (!session || session.expiresAt < Date.now()) {
+    if (session) adminSessions.delete(token);
+    res.json({ authenticated: false });
+    return;
+  }
+
+  res.json({
+    authenticated: true,
+    username: session.username,
+    expiresAt: session.expiresAt,
+  });
+});
+
+// Admin Logout Endpoint
+app.post('/api/admin/logout', (req: Request, res: Response): void => {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+
+  if (token) {
+    adminSessions.delete(token);
+  }
+
+  res.json({ success: true, message: 'Logged out successfully' });
+});
+
+// -----------------------------------------------------------------------------
 // API Endpoints for M-Pesa STK Push
 // -----------------------------------------------------------------------------
 
@@ -260,6 +423,15 @@ app.post('/api/mpesa/temporary-credentials', async (req: Request, res: Response)
 
 // 3. Simulate Prompt Action (for on-screen phone testing)
 app.post('/api/mpesa/simulate-action', (req: Request, res: Response): void => {
+  // Enterprise Security: Block simulation if running in production without explicit allow flag
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_SIMULATION !== 'true') {
+    res.status(403).json({
+      success: false,
+      error: 'Simulation endpoint is disabled in production environment. Authentic Safaricom Daraja callback required.'
+    });
+    return;
+  }
+
   const { checkoutRequestId, action } = req.body;
 
   if (!checkoutRequestId) {

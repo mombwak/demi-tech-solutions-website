@@ -18,10 +18,16 @@
   # Route M-Pesa API endpoints to PHP handlers in cPanel environments
   RewriteRule ^api/mpesa/config-status/?$ api/mpesa/config-status.php [L,QSA]
   RewriteRule ^api/mpesa/stkpush/?$ api/mpesa/stkpush.php [L,QSA]
+  RewriteRule ^api/mpesa/callback/?$ api/mpesa/callback.php [L,QSA]
   RewriteRule ^api/mpesa/status/([^/]+)/?$ api/mpesa/status.php?id=$1 [L,QSA]
   RewriteRule ^api/mpesa/status/?$ api/mpesa/status.php [L,QSA]
   RewriteRule ^api/mpesa/simulate-action/?$ api/mpesa/simulate-action.php [L,QSA]
   RewriteRule ^api/mpesa/temporary-credentials/?$ api/mpesa/temporary-credentials.php [L,QSA]
+
+  # Route Administrator Authentication API endpoints to PHP handlers in cPanel environments
+  RewriteRule ^api/admin/login/?$ api/admin/login.php [L,QSA]
+  RewriteRule ^api/admin/verify-session/?$ api/admin/verify-session.php [L,QSA]
+  RewriteRule ^api/admin/logout/?$ api/admin/logout.php [L,QSA]
 
   # Prevent API routes from ever falling back to index.html (eliminates JSON parse errors)
   RewriteCond %{REQUEST_URI} ^/api/ [NC]
@@ -87,6 +93,12 @@
 # Caching Rules: Never cache index.html (guarantees newest code is always loaded)
 # Cache hashed assets aggressively (1 year)
 <IfModule mod_headers.c>
+  # Enterprise HTTP Security Headers
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
+
   # CORS header for ES module compatibility across subdomains/CDNs
   Header set Access-Control-Allow-Origin "*"
   Header set Access-Control-Allow-Headers "Content-Type, Authorization"

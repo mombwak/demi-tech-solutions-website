@@ -9,15 +9,49 @@ export type PageView =
   | 'solutions' 
   | 'projects' 
   | 'insights' 
+  | 'investors'
+  | 'proposals'
   | 'technician-network' 
   | 'contact'
   | 'admin';
+
+export interface InvestorEnquiry {
+  id: string;
+  submittedAt: string;
+  organisation: string;
+  contactPerson: string;
+  country: string;
+  email: string;
+  phone?: string;
+  website?: string;
+  partnershipCategory: 'Technology Manufacturer' | 'Equipment Distributor' | 'Software Vendor' | 'Infrastructure Investor' | 'Institutional Partner' | 'Other';
+  areasOfInterest: string[];
+  message: string;
+  status: 'New' | 'Under Review' | 'Meeting Scheduled';
+}
+
+export interface EngineeringProposalRequest {
+  id: string;
+  submittedAt: string;
+  organisation: string;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  location: string;
+  division: 'Security & Surveillance' | 'Enterprise Software & Automation' | 'ICT Infrastructure & Networking' | 'Energy & Power Resilience' | 'Technology Consulting & Systems Integration' | 'Multi-Division Turnkey';
+  estimatedScope: string;
+  expectedTimeline: string;
+  budgetRange?: string;
+  projectDescription: string;
+  status: 'Pending Review' | 'Technical Survey Slated' | 'Proposal Drafted';
+}
 
 export type SolutionDivisionId = 
   | 'security' 
   | 'automation' 
   | 'enterprise' 
-  | 'power';
+  | 'power'
+  | 'consulting';
 
 export interface ServiceItem {
   name: string;

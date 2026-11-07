@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#000000"/>
+  <!-- Architectural Geometric Circuit Grid -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="20" stroke-linecap="square" stroke-linejoin="miter">
+    <!-- Outer Hex Shield -->
+    <path d="M256 70 L420 165 L420 347 L256 442 L92 347 L92 165 Z" />
+    <!-- Inner D Precision Monogram & Circuit Nodes -->
+    <path d="M180 160 L180 352 M180 160 L280 160 C340 160 360 200 360 256 C360 312 340 352 280 352 L180 352" stroke-width="24" />
+    <!-- Tech Integration Crossbar & Nodes -->
+    <line x1="230" y1="256" x2="350" y2="256" stroke-width="16" />
+  </g>
+  <circle cx="256" cy="70" r="14" fill="#FFFFFF" />
+  <circle cx="420" cy="165" r="14" fill="#FFFFFF" />
+  <circle cx="420" cy="347" r="14" fill="#FFFFFF" />
+  <circle cx="256" cy="442" r="14" fill="#FFFFFF" />
+  <circle cx="92" cy="347" r="14" fill="#FFFFFF" />
+  <circle cx="92" cy="165" r="14" fill="#FFFFFF" />
+  <circle cx="256" cy="256" r="20" fill="#FFFFFF" />
+</svg>

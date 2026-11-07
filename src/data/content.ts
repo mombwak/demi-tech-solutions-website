@@ -261,6 +261,63 @@ export const CORE_DIVISIONS: SolutionDivision[] = [
       'Educational institutions operating computer labs and administrative servers',
     ],
   },
+  {
+    id: 'consulting',
+    number: '05',
+    title: 'Technology Consulting',
+    headline: 'INDEPENDENT ENGINEERING ADVISORY & SYSTEMS INTEGRATION',
+    description:
+      'Vendor-neutral technology consulting, infrastructure audits, and multi-vendor systems integration for corporate clients, institutions, and high-value tenders.',
+    image: '/assets/images/hero_corporate_tech_1793582462732.jpg',
+    imageAlt: 'Technology consultant and systems integration engineer reviewing architectural blueprint and network schematics',
+    services: [
+      'Technology infrastructure feasibility & audits',
+      'Vendor-neutral RFP & tender specifications',
+      'Multi-vendor systems integration management',
+      'Network & physical security compliance audits',
+      'Service Level Agreement (SLA) design & monitoring',
+      'Disaster recovery & business continuity planning',
+      'Digital transformation & ERP roadmap advisory',
+      'Independent quality assurance & commissioning',
+    ],
+    detailedServices: [
+      {
+        name: 'Infrastructure Feasibility & Technical Site Audits',
+        description:
+          'Comprehensive architectural surveys evaluating existing cabling, surveillance coverage, electrical quality, and bandwidth bottlenecks to draft prioritized engineering roadmaps.',
+        specs: ['Quantitative Signal & Decibel Testing', 'Power Quality & Harmonic Distortion Logging', 'Coverage Blind-Spot Mapping', 'Comprehensive Executive Risk Matrix'],
+      },
+      {
+        name: 'RFP Formulation & Tender Documentation',
+        description:
+          'Drafting vendor-neutral technical specifications, Bill of Quantities (BOQ), and evaluation scorecards for corporate procurement teams and institutional tenders.',
+        specs: ['Strict Vendor Neutrality', 'Granular Equipment Specifications', 'Objective Vendor Evaluation Rubrics', 'Cost Optimization & BOQ Validation'],
+      },
+      {
+        name: 'Multi-System Integration & Commissioning Management',
+        description:
+          'Acting as the lead systems integrator to harmonize access control, IP cameras, ERP databases, fire detection, and network hardware into a cohesive operational control console.',
+        specs: ['API & Protocol Harmonization (ONVIF, REST, Modbus)', 'Formal Factory & Site Acceptance Testing (FAT/SAT)', 'As-Built Documentation & Port Schedules', 'Staff Handover & Operations Training'],
+      },
+      {
+        name: 'Disaster Recovery & Redundancy Design',
+        description:
+          'Designing resilient operational architectures that ensure zero data loss and minimal downtime during regional fiber cuts, grid blackouts, or hardware failures.',
+        specs: ['RTO < 15min / RPO = 0 Architecture', 'Automated Off-Site Backups & Failover', 'Multi-ISP & Satellite Fallback Design', 'Annual Disaster Simulation Drills'],
+      },
+    ],
+    architecturalHighlights: [
+      'Completely vendor-agnostic advice focused purely on engineering efficacy and long-term total cost of ownership',
+      'Adherence to Kenyan statutory standards, EPRA guidelines, and the Data Protection Act 2019',
+      'Rigorous commissioning standards with formal sign-off protocols and as-built CAD schematics',
+    ],
+    typicalClients: [
+      'Corporate boards and executive management teams planning major capital technology investments',
+      'Hospitals, healthcare networks, and medical institutions seeking digital health compliance',
+      'Commercial property developers and architectural firms needing MEP technology integration',
+      'Public sector institutions and regional parastatals issuing formal technology procurement tenders',
+    ],
+  },
 ];
 
 export const WHY_US_REASONS = [
