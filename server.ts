@@ -813,6 +813,60 @@ app.get('/api/mpesa/status/:checkoutRequestId', async (req: Request, res: Respon
 });
 
 // -----------------------------------------------------------------------------
+// Customer General Enquiries API
+// -----------------------------------------------------------------------------
+interface ServerCustomerEnquiry {
+  id: string;
+  createdAt: string;
+  name: string;
+  phone: string;
+  email?: string;
+  county: string;
+  message: string;
+  status: 'NEW' | 'CONTACTED' | 'CONVERTED' | 'ARCHIVED';
+}
+
+const customerEnquiriesStore = new Map<string, ServerCustomerEnquiry>();
+
+app.post('/api/enquiry', (req: Request, res: Response): void => {
+  try {
+    const { id, createdAt, name, phone, email, county, message } = req.body || {};
+    if (!name || !phone || !message) {
+      res.status(400).json({ success: false, error: 'Name, phone, and message are required' });
+      return;
+    }
+
+    const enquiryId = id || `ENQ-${Date.now().toString().slice(-6)}`;
+    const record: ServerCustomerEnquiry = {
+      id: enquiryId,
+      createdAt: createdAt || new Date().toISOString(),
+      name: String(name).trim(),
+      phone: String(phone).trim(),
+      email: email ? String(email).trim() : undefined,
+      county: county ? String(county).trim() : 'Kisumu',
+      message: String(message).trim(),
+      status: 'NEW',
+    };
+
+    customerEnquiriesStore.set(enquiryId, record);
+    console.log(`[Customer Enquiry] Received enquiry ${enquiryId} from ${record.name} (${record.phone})`);
+
+    res.json({ success: true, id: enquiryId, message: 'Enquiry received successfully' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: 'Failed to process enquiry', details: err.message });
+  }
+});
+
+app.get('/api/admin/enquiries', requireAdminAuth, (_req: Request, res: Response): void => {
+  res.json({
+    success: true,
+    enquiries: Array.from(customerEnquiriesStore.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    ),
+  });
+});
+
+// -----------------------------------------------------------------------------
 // cPanel public_html Deployment Package Distribution Handlers
 // -----------------------------------------------------------------------------
 

@@ -15,6 +15,17 @@ export type PageView =
   | 'contact'
   | 'admin';
 
+export interface CustomerEnquiry {
+  id: string;
+  name: string;
+  email?: string;
+  phone: string;
+  county: string;
+  message: string;
+  submittedAt: string;
+  status: 'New' | 'Contacted' | 'Closed';
+}
+
 export interface InvestorEnquiry {
   id: string;
   submittedAt: string;

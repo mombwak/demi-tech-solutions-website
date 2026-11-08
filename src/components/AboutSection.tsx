@@ -43,7 +43,22 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               We treat security, business software, networking infrastructure, and power resilience as interconnected elements of one authoritative system. When your cameras, POS terminals, and servers share a properly engineered foundation, operational friction drops, costs stabilize, and business visibility becomes real.
             </p>
 
-            <div className="pt-4 border-t border-neutral-200">
+            <div className="pt-6 border-t border-neutral-200 space-y-4">
+              <div className="p-4 bg-neutral-50 border border-neutral-300">
+                <h3 className="text-xs font-mono uppercase tracking-widest text-black font-bold mb-2">
+                  Operating Model: Remote-First. Field-Ready. Customer-Focused.
+                </h3>
+                <p className="text-xs text-neutral-700 leading-relaxed mb-3">
+                  Professional technology services, delivered around your needs. Demi Tech Solutions operates through a remote-first service model designed around convenience and efficient coordination.
+                </p>
+                <p className="text-xs text-neutral-700 leading-relaxed mb-3">
+                  Contact us through WhatsApp, phone or our website to discuss your requirements, request a quotation or book a consultation. For projects requiring physical assessment, installation or maintenance, we arrange scheduled visits and dispatch technical personnel to your location.
+                </p>
+                <p className="text-xs text-neutral-700 leading-relaxed">
+                  From your first enquiry to project completion, we coordinate the process and remain your primary point of contact. <strong>All physical appointments are arranged in advance. We do not currently operate a walk-in customer office.</strong>
+                </p>
+              </div>
+
               <h3 className="text-xs font-mono uppercase tracking-widest text-black font-bold mb-4">
                 What Guides Every Engagement:
               </h3>
@@ -87,33 +102,36 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           <div className="lg:col-span-5 bg-neutral-900 text-white p-8 sm:p-10 border border-neutral-800">
             <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-neutral-400 mb-6">
               <MapPin className="w-4 h-4 text-neutral-400" />
-              <span>Location & Service Footprint</span>
+              <span>Service Delivery & Coverage</span>
             </div>
 
             <div className="space-y-4 mb-8 text-xs font-mono">
               <div className="py-2 border-b border-neutral-800">
-                <div className="text-neutral-500 uppercase text-[10px]">Headquarters</div>
-                <div className="text-sm font-bold text-white mt-0.5">Kisumu, Kenya</div>
+                <div className="text-neutral-500 uppercase text-[10px]">Operating Model</div>
+                <div className="text-sm font-bold text-white mt-0.5">Remote-First · Field-Ready</div>
+                <div className="text-[11px] text-neutral-400 font-sans mt-0.5">
+                  Scheduled physical visits dispatched across client locations. No walk-in showroom.
+                </div>
               </div>
 
               <div className="py-2 border-b border-neutral-800">
-                <div className="text-neutral-500 uppercase text-[10px]">Primary Regional Market</div>
+                <div className="text-neutral-500 uppercase text-[10px]">Primary Regional Corridor</div>
                 <div className="text-neutral-200 mt-0.5">
                   Kisumu, Kakamega, Bungoma, Busia, Siaya, Homa Bay, Vihiga, Migori, Kisii
                 </div>
               </div>
 
               <div className="py-2 border-b border-neutral-800">
-                <div className="text-neutral-500 uppercase text-[10px]">Secondary Market</div>
+                <div className="text-neutral-500 uppercase text-[10px]">National Coverage</div>
                 <div className="text-neutral-200 mt-0.5">
-                  Nationwide Kenya (Commercial & Institutional Tenders)
+                  Serving Kisumu, Western Kenya and businesses across Kenya, subject to project location and technical availability.
                 </div>
               </div>
 
               <div className="py-2">
-                <div className="text-neutral-500 uppercase text-[10px]">Engagement Policy</div>
+                <div className="text-neutral-500 uppercase text-[10px]">Consultation Protocol</div>
                 <div className="text-neutral-200 mt-0.5">
-                  Professional consultations conducted by appointment
+                  Initial reviews conducted remotely; on-site audits scheduled by advance appointment.
                 </div>
               </div>
             </div>
@@ -122,7 +140,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               onClick={onOpenConsultation}
               className="w-full py-3.5 text-xs font-bold tracking-wider text-black bg-white hover:bg-neutral-100 transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>SCHEDULE AN ENGINEERING CONSULTATION</span>
+              <span>SCHEDULE A TECHNICAL CONSULTATION</span>
               <ArrowUpRight className="w-4 h-4" />
             </button>
           </div>

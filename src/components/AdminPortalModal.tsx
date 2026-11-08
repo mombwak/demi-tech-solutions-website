@@ -26,6 +26,7 @@ import {
   getStoredConsultations,
   getStoredProposalRequests,
   getStoredInvestorEnquiries,
+  getStoredCustomerEnquiries,
   updateApplicationStatus,
   updateConsultationStatus,
   getAdminSettings,
@@ -40,6 +41,7 @@ import {
   ConsultationBooking,
   EngineeringProposalRequest,
   InvestorEnquiry,
+  CustomerEnquiry,
 } from '../types.ts';
 import { KENYA_COUNTIES } from '../data/content.ts';
 
@@ -52,11 +54,12 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState<'applications' | 'consultations' | 'proposals' | 'investors' | 'settings'>('applications');
+  const [activeTab, setActiveTab] = useState<'applications' | 'consultations' | 'proposals' | 'investors' | 'enquiries' | 'settings'>('applications');
   const [applications, setApplications] = useState<TechnicianApplication[]>([]);
   const [consultations, setConsultations] = useState<ConsultationBooking[]>([]);
   const [proposals, setProposals] = useState<EngineeringProposalRequest[]>([]);
   const [investorEnquiries, setInvestorEnquiries] = useState<InvestorEnquiry[]>([]);
+  const [customerEnquiries, setCustomerEnquiries] = useState<CustomerEnquiry[]>([]);
   const [settings, setSettings] = useState<AdminSettings>(getAdminSettings());
   const [darajaConfig, setDarajaConfig] = useState<DarajaTemporaryConfig>(getStoredDarajaConfig());
   const [darajaVerifying, setDarajaVerifying] = useState(false);
@@ -83,6 +86,7 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
     setConsultations(getStoredConsultations());
     setProposals(getStoredProposalRequests());
     setInvestorEnquiries(getStoredInvestorEnquiries());
+    setCustomerEnquiries(getStoredCustomerEnquiries());
     setSettings(getAdminSettings());
     setDarajaConfig(getStoredDarajaConfig());
   };
@@ -454,6 +458,18 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
             >
               <Briefcase className="w-3.5 h-3.5" />
               <span>Investors ({investorEnquiries.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('enquiries')}
+              className={`px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors ${
+                activeTab === 'enquiries'
+                  ? 'bg-white text-black border border-neutral-300 shadow-sm'
+                  : 'text-neutral-600 hover:text-black'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>General Enquiries ({customerEnquiries.length})</span>
             </button>
 
             <button
@@ -871,7 +887,72 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
             </div>
           )}
 
-          {/* TAB 5: SETTINGS */}
+          {/* TAB 5: GENERAL CUSTOMER ENQUIRIES */}
+          {activeTab === 'enquiries' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-neutral-600">
+                  Direct inquiries received through the website contact and project requirement form.
+                </div>
+                <div className="text-xs font-mono text-neutral-500 font-bold">
+                  Total Enquiries: {customerEnquiries.length}
+                </div>
+              </div>
+
+              <div className="divide-y divide-neutral-200 border border-neutral-200">
+                {customerEnquiries.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-neutral-500">
+                    No general enquiries submitted yet. Submissions from the contact form will appear here.
+                  </div>
+                ) : (
+                  customerEnquiries.map((item) => (
+                    <div key={item.id} className="p-4 sm:p-5 hover:bg-neutral-50 transition-colors space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <div className="text-[11px] font-mono text-neutral-500">
+                            REF: {item.id} · {item.submittedAt}
+                          </div>
+                          <h4 className="text-base font-bold text-black">
+                            {item.name}
+                          </h4>
+                          <div className="text-xs text-neutral-600">
+                            County: {item.county} · Phone: <a href={`tel:${item.phone}`} className="font-bold underline text-black">{item.phone}</a>
+                            {item.email && ` · Email: ${item.email}`}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-bold px-2 py-0.5 bg-neutral-900 text-white">
+                            {item.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-neutral-50 border border-neutral-200 text-xs text-neutral-700">
+                        <strong>Project Requirements:</strong>
+                        <p className="mt-1 leading-relaxed">{item.message}</p>
+                      </div>
+
+                      <div className="flex items-center gap-3 pt-1">
+                        <a
+                          href={`https://wa.me/${item.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                            `Hello ${item.name}, thank you for contacting Demi Tech Solutions regarding your system requirements.`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-bold text-black underline flex items-center gap-1 hover:text-neutral-600"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>Respond on WhatsApp</span>
+                        </a>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: SETTINGS */}
           {activeTab === 'settings' && (
             <form onSubmit={handleSaveSettings} className="max-w-xl space-y-6">
               <div>

@@ -78,10 +78,13 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({
                 <ShieldAlert className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-xs font-mono uppercase tracking-wider text-white font-bold mb-1">
-                    Chargeable Engineering Consultations
+                    Structured Technical Assessments & Transparent Fees
                   </h4>
+                  <p className="text-xs text-neutral-400 leading-relaxed mb-2">
+                    General project inquiries, capability discussions, and preliminary WhatsApp chats are always <strong>free of charge</strong>. Not every inquiry requires a paid consultation.
+                  </p>
                   <p className="text-xs text-neutral-400 leading-relaxed">
-                    Demi Tech Solutions conducts structured consultations by appointment. We do not offer generic, superficial sales pitches; you receive dedicated engineering time, preliminary schematic evaluation, and actionable technical specifications.
+                    Where a project requires dedicated engineering time—such as an in-depth remote technical architecture review (from KES 2,000) or an on-site physical survey with RF heatmapping, load analysis, and cable measurements—we conduct structured, paid assessments to deliver actionable engineering specifications.
                   </p>
                 </div>
               </div>
@@ -110,25 +113,25 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({
             <div className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-2">
               Appointment Scheduling
             </div>
-            <h3 className="text-2xl font-extrabold text-black mb-4">
-              Book Your Technical Consultation
+            <h3 className="text-2xl font-extrabold text-black mb-2">
+              Book a Technical Consultation
             </h3>
 
             <p className="text-xs text-neutral-600 leading-relaxed mb-6">
-              Select the consultation format that matches your project requirements. Appointments are confirmed upon M-Pesa receipt verification.
+              Initial phone and WhatsApp inquiries are free. For in-depth technical evaluations, select your format below.
             </p>
 
             {/* Fee Tiers */}
             <div className="space-y-4 mb-8">
               <div className="p-4 bg-neutral-50 border border-neutral-200">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-black uppercase">Remote Consultation</span>
+                  <span className="text-xs font-bold text-black uppercase">Remote Technical Consultation</span>
                   <span className="text-sm font-mono font-bold text-black">
-                    KES {(settings.consultationFeeRemote ?? 2500).toLocaleString()}
+                    KES {(settings.consultationFeeRemote ?? 2000).toLocaleString()}
                   </span>
                 </div>
                 <p className="text-xs text-neutral-600 leading-relaxed">
-                  Zoom / Google Meet or phone review. In-depth technical briefing, scope evaluation, and BoQ guidance.
+                  Zoom / Google Meet or phone review. In-depth technical briefing, scope evaluation, and Bill of Quantities guidance.
                 </p>
               </div>
 
@@ -136,11 +139,11 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-bold text-black uppercase">On-Site Assessment (Kisumu)</span>
                   <span className="text-sm font-mono font-bold text-black">
-                    KES {(settings.consultationFeeLocal ?? 5000).toLocaleString()}
+                    KES {(settings.consultationFeeLocal ?? 4000).toLocaleString()}
                   </span>
                 </div>
                 <p className="text-xs text-neutral-600 leading-relaxed">
-                  Physical visit within Kisumu and immediate environs. Precise cable measurements, RF audit & electrical load analysis.
+                  Physical visit within Kisumu environs. Precise cable runs, Wi-Fi RF heatmaps & electrical load analysis.
                 </p>
               </div>
 
@@ -148,7 +151,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-bold text-black uppercase">Regional Assessment (Western Kenya)</span>
                   <span className="text-sm font-mono font-bold text-black">
-                    KES {(settings.consultationFeeRegional ?? 8500).toLocaleString()}
+                    KES {(settings.consultationFeeRegional ?? 7500).toLocaleString()}
                   </span>
                 </div>
                 <p className="text-xs text-neutral-600 leading-relaxed">

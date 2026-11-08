@@ -24,52 +24,59 @@ export const Hero: React.FC<HeroProps> = ({
           {/* Left Column: Proposition & CTAs */}
           <div className="lg:col-span-7 flex flex-col justify-between py-2">
             <div>
-              <div className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-4">
-                Kisumu, Kenya · Western Kenya · Nationwide Engineering
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-neutral-100 border border-neutral-300 text-[11px] font-mono uppercase tracking-wider text-black font-semibold mb-4">
+                <span>Remote-First</span>
+                <span className="text-neutral-400">·</span>
+                <span>Field-Ready</span>
+                <span className="text-neutral-400">·</span>
+                <span>Scheduled Visits</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold text-black tracking-tight leading-[1.12] mb-6 text-balance">
-                ENGINEERING INTELLIGENT TECHNOLOGY SYSTEMS.
+                TECHNOLOGY THAT WORKS FOR YOUR HOME AND BUSINESS.
               </h1>
 
               <div className="w-16 h-1 bg-black mb-6" />
 
               <p className="text-base sm:text-lg text-neutral-700 leading-relaxed max-w-2xl mb-8">
-                We design, integrate and maintain intelligent technology solutions for businesses, institutions and properties across Kenya. Our expertise spans security engineering, enterprise systems, business automation and technology infrastructure.
+                From security installations and business management systems to networking and smart technology, Demi Tech Solutions helps you solve practical technology challenges with professional support and field service across Kisumu, Western Kenya and nationwide.
               </p>
             </div>
 
             {/* CTAs & Secondary Actions */}
             <div className="pt-2">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-8">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
                 <button
                   onClick={onOpenConsultation}
                   className="px-7 py-4 text-xs font-bold tracking-wider text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm whitespace-nowrap shrink-0"
                 >
-                  <span>BOOK A PROFESSIONAL CONSULTATION</span>
+                  <span>BOOK A CONSULTATION</span>
                   <ArrowUpRight className="w-4 h-4" />
                 </button>
 
-                <button
-                  onClick={onExploreSolutions}
-                  className="px-7 py-4 text-xs font-bold tracking-wider text-black bg-white hover:bg-neutral-100 border border-neutral-300 transition-colors flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap shrink-0"
-                >
-                  <span>EXPLORE OUR SOLUTIONS</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Direct WhatsApp Consultation Line */}
-              <div className="flex items-center gap-3 text-xs text-neutral-500 pt-2 border-t border-neutral-100">
-                <span className="font-semibold text-neutral-800">Direct Engineering Desk:</span>
                 <a
                   href={COMPANY_INFO.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-black font-semibold underline underline-offset-4 hover:text-neutral-700"
+                  className="px-7 py-4 text-xs font-bold tracking-wider text-black bg-white hover:bg-neutral-100 border border-neutral-300 transition-colors flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap shrink-0"
                 >
-                  Talk directly via WhatsApp (+254 703 293201)
+                  <span>CHAT ON WHATSAPP</span>
+                  <ArrowUpRight className="w-4 h-4" />
                 </a>
+
+                <button
+                  onClick={onExploreSolutions}
+                  className="px-5 py-4 text-xs font-bold tracking-wider text-neutral-700 hover:text-black underline underline-offset-4 transition-colors flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
+                >
+                  <span>Explore Solutions</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Direct Service Model Transparency Notice */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-neutral-600 pt-3 border-t border-neutral-100">
+                <span className="font-bold text-black uppercase tracking-wider text-[11px] font-mono">Service Model:</span>
+                <span>All physical assessments and installations are arranged in advance. We do not operate a walk-in office.</span>
               </div>
             </div>
           </div>

@@ -4,8 +4,9 @@
  */
 
 import React, { useState } from 'react';
-import { Phone, Mail, Globe, MapPin, MessageSquare, ArrowUpRight, CheckCircle2, Clock } from 'lucide-react';
+import { Phone, Mail, Globe, MapPin, MessageSquare, ArrowUpRight, CheckCircle2, Clock, ShieldAlert } from 'lucide-react';
 import { COMPANY_INFO, KENYA_COUNTIES } from '../data/content.ts';
+import { saveCustomerEnquiry } from '../utils/storage.ts';
 
 interface ContactSectionProps {
   onOpenConsultation: () => void;
@@ -20,10 +21,39 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   const [county, setCounty] = useState('Kisumu');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleGeneralSubmit = (e: React.FormEvent) => {
+  const handleGeneralSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim() || !message.trim()) return;
+
+    setIsSubmitting(true);
+    const enquiry = {
+      id: `ENQ-${Date.now().toString().slice(-6)}`,
+      submittedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      county,
+      message: message.trim(),
+      status: 'New' as const,
+    };
+
+    // Save to client local storage
+    saveCustomerEnquiry(enquiry);
+
+    // Also dispatch to backend API asynchronously
+    try {
+      await fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(enquiry),
+      });
+    } catch {
+      // Local storage backup ensures zero data loss
+    }
+
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
@@ -41,19 +71,30 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
               LET&apos;S DISCUSS YOUR SYSTEM REQUIREMENTS.
             </h2>
 
-            <p className="text-sm text-neutral-300 leading-relaxed mb-8">
-              Whether you are planning a new commercial security deployment, automating a supermarket checkout chain, or upgrading your institution&apos;s network infrastructure, our engineering desk is ready to assist.
+            <p className="text-sm text-neutral-300 leading-relaxed mb-6">
+              Whether you are planning a commercial security deployment, automating checkout points, or upgrading network infrastructure, our engineering desk is ready to assist.
             </p>
+
+            {/* Operating Model Transparency Box */}
+            <div className="p-4 bg-neutral-950 border border-neutral-800 mb-8 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-neutral-300 uppercase">
+                <ShieldAlert className="w-4 h-4 text-white shrink-0" />
+                <span>Operating Model Notice</span>
+              </div>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Demi Tech Solutions operates as a <strong>remote-first, field-ready engineering firm</strong>. We do not maintain a walk-in retail counter or showroom. All physical site surveys, installation engagements, and maintenance visits are arranged in advance and dispatched directly to client facilities.
+              </p>
+            </div>
 
             <div className="space-y-5 text-sm font-mono border-t border-neutral-800 pt-6">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-white shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-[10px] text-neutral-500 uppercase">Headquarters</div>
+                  <div className="text-[10px] text-neutral-500 uppercase">Operating Base & Dispatch</div>
                   <div className="text-white font-bold">{COMPANY_INFO.name}</div>
-                  <div className="text-neutral-400">{COMPANY_INFO.location}</div>
+                  <div className="text-neutral-400">{COMPANY_INFO.location} · Field Engineers Dispatched On-Site</div>
                   <div className="text-[11px] text-neutral-500 mt-1 font-sans">
-                    Primary Service Corridor: Kisumu, Kakamega, Bungoma, Busia, Siaya, Homa Bay, Migori, Kisii.
+                    Primary Service Corridor: Kisumu, Kakamega, Bungoma, Busia, Siaya, Homa Bay, Migori, Kisii, and Nationwide.
                   </div>
                 </div>
               </div>
@@ -74,7 +115,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
               <div className="flex items-start gap-3">
                 <MessageSquare className="w-5 h-5 text-white shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-[10px] text-neutral-500 uppercase">Direct WhatsApp Desk</div>
+                  <div className="text-[10px] text-neutral-500 uppercase">Direct WhatsApp Desk (Free Initial Enquiries)</div>
                   <a
                     href={COMPANY_INFO.whatsappUrl}
                     target="_blank"
@@ -85,7 +126,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </a>
                   <span className="text-[10px] text-neutral-400 font-sans block mt-0.5">
-                    Fastest response for project inquiries & site coordinates
+                    Fastest response for project questions, scope discussion & site coordinates (Free)
                   </span>
                 </div>
               </div>
@@ -127,7 +168,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 Monday – Saturday: 08:00 – 18:00 (EAT)
               </div>
               <div className="text-neutral-500 text-[11px] mt-0.5">
-                Emergency support available 24/7 for contracted SLA clients.
+                Physical assessments arranged in advance. Emergency SLA response available 24/7 for contracted clients.
               </div>
             </div>
           </div>

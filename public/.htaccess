@@ -29,6 +29,9 @@
   RewriteRule ^api/admin/verify-session/?$ api/admin/verify-session.php [L,QSA]
   RewriteRule ^api/admin/logout/?$ api/admin/logout.php [L,QSA]
 
+  # Route Customer General Enquiry API endpoint
+  RewriteRule ^api/enquiry/?$ api/enquiry.php [L,QSA]
+
   # Prevent API routes from ever falling back to index.html (eliminates JSON parse errors)
   RewriteCond %{REQUEST_URI} ^/api/ [NC]
   RewriteRule ^ - [R=404,L]

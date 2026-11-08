@@ -23,10 +23,13 @@ export const COMPANY_INFO = {
   whatsappPrefilledMessage: 'Hello Demi Tech Solutions, I would like to enquire about booking a professional consultation.',
   whatsappUrl:
     'https://wa.me/254703293201?text=Hello%20Demi%20Tech%20Solutions%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20professional%20consultation.',
-  consultationFeeRemote: 2500,
-  consultationFeeLocal: 5000,
-  consultationFeeRegional: 8500,
+  consultationFeeRemote: 2000,
+  consultationFeeLocal: 4000,
+  consultationFeeRegional: 7500,
   mpesaTillNumber: '5829259',
+  operatingModel: 'Remote-First. Field-Ready. Customer-Focused.',
+  operatingNotice: 'All physical assessments and installations are arranged in advance. We do not currently operate a walk-in customer office.',
+  serviceCoverageNotice: 'Serving Kisumu, Western Kenya and businesses across Kenya, subject to project location and technical availability.',
 };
 
 export const CORE_DIVISIONS: SolutionDivision[] = [

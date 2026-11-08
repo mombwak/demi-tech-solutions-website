@@ -246,7 +246,7 @@ export const Footer: React.FC<FooterProps> = ({
                   }}
                   className="hover:text-white transition-colors block"
                 >
-                  Contact & Office Info
+                  Contact & Scheduling
                 </a>
               </li>
             </ul>
@@ -278,7 +278,7 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="space-y-3 text-neutral-300 font-mono">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
-                <span>Kisumu, Kenya (Western Kenya Regional HQ)</span>
+                <span>Remote-First · Field-Ready (Kisumu Base) — All visits scheduled in advance</span>
               </div>
               <div className="flex items-start gap-2">
                 <Phone className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
