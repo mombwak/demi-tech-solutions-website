@@ -8,6 +8,7 @@ import { PageView } from '../types.ts';
 import { COMPANY_INFO, CORE_DIVISIONS } from '../data/content.ts';
 import { ArrowUpRight, Phone, Mail, MapPin, ShieldCheck, Lock } from 'lucide-react';
 import { getPageUrl } from '../utils/navigation.ts';
+import { CompanyLogo } from './CompanyLogo.tsx';
 
 interface FooterProps {
   onNavigate: (page: PageView) => void;
@@ -56,13 +57,7 @@ export const Footer: React.FC<FooterProps> = ({
               aria-label="Demi Tech Solutions Home"
               className="flex items-center gap-3 mb-3 hover:opacity-90 transition-opacity"
             >
-              <img
-                src="/assets/logo.png"
-                alt="Demi Tech Solutions Logo"
-                width={40}
-                height={40}
-                className="w-10 h-10 object-contain rounded-md border border-neutral-700 bg-neutral-950"
-              />
+              <CompanyLogo className="w-10 h-10" size={40} />
               <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-white block">
                 DEMI TECH SOLUTIONS
               </span>

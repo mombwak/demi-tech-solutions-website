@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%" fill="none" aria-label="Demi Tech Solutions Logo">
+  <rect width="256" height="256" fill="#000000" rx="16"/>
+  <!-- Outer framing corners -->
+  <path d="M48 24H24v24M208 24h24v24M48 232H24v-24M208 232h24v-24" stroke="#ffffff" stroke-width="14" stroke-linecap="square"/>
+  <!-- Central Stylized 'D' & Tech aperture -->
+  <path d="M80 64h44c38 0 68 28 68 64s-30 64-68 64H80V64z" stroke="#ffffff" stroke-width="16" fill="none" stroke-linejoin="round"/>
+  <!-- Inner tech pulse key / node -->
+  <path d="M80 128h54" stroke="#ffffff" stroke-width="16" stroke-linecap="square"/>
+  <circle cx="152" cy="128" r="14" fill="#ffffff"/>
+  <!-- Forward radar arc -->
+  <path d="M128 102c14 6 24 16 24 26s-10 20-24 26" stroke="#ffffff" stroke-width="8" stroke-linecap="round" fill="none"/>
+</svg>

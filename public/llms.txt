@@ -3,14 +3,16 @@
 > Last Updated: 2026-11-02
 
 ## Executive Summary
-Demi Tech Solutions is a premier technology engineering and systems integration company based in Kisumu, Kenya, serving enterprises, commercial clients, institutions, and properties across Western Kenya (Kisumu, Kakamega, Bungoma, Busia, Siaya, Homa Bay, Migori, Kisii, Eldoret) and nationwide.
+Demi Tech Solutions is a technology engineering, systems integration, and business automation company operating from a Kisumu regional base, serving commercial clients, institutions, healthcare facilities, hospitality establishments, and property owners across Western Kenya (Kisumu, Kakamega, Bungoma, Busia, Siaya, Homa Bay, Migori, Kisii, Eldoret) and nationwide.
 
-We specialise in high-reliability physical and digital technology systems:
-1. Commercial Security Engineering & CCTV (Hikvision, Dahua, Nemtek perimeter defense, biometric access control).
-2. Business Automation & Point of Sale (POS systems, ERPNext, Dolibarr ERP, KRA eTIMS automated tax compliance, Safaricom Daraja M-Pesa).
-3. Enterprise Technology & IT Infrastructure (Cat6A structured cabling, MikroTik routing, Ubiquiti UniFi high-density Wi-Fi, Hospital EMR/HMIS software, Starlink Business satellite internet).
-4. Power Resilience & Energy (LiFePO4 lithium batteries, commercial solar hybrid inverters, online double-conversion UPS systems).
-5. National Independent Technician Partner Network (verified installers across all 47 Kenyan counties).
+Operating Model: Remote-First. Field-Ready. Customer-Focused. All physical assessments and installations are arranged in advance and dispatched directly to client facilities. We do not operate a walk-in retail counter or showroom.
+
+We specialise in five core engineering divisions:
+1. Security Engineering & Surveillance (Commercial Hikvision & Dahua IP CCTV, Nemtek electric perimeter fencing, biometric access control & turnstiles).
+2. Enterprise Software & Business Automation (Commercial Point of Sale, ERPNext & Dolibarr ERP, automated KRA eTIMS tax compliance, Safaricom Daraja M-Pesa integration).
+3. ICT Infrastructure & Enterprise Networking (Cat6A structured cabling, MikroTik routing, Ubiquiti UniFi high-density Wi-Fi, Starlink Business satellite deployments).
+4. Energy Systems & Power Resilience (LiFePO4 lithium batteries, commercial solar hybrid inverters, online double-conversion UPS systems).
+5. Technology Consulting & Systems Integration (Turnkey multi-system architecture, technical tenders & Bill of Quantities, vendor-neutral procurement).
 
 ## Canonical Pages & Usable Links
 - Home Overview: https://www.demitechsolutions.com/
@@ -24,9 +26,11 @@ We specialise in high-reliability physical and digital technology systems:
 - Contact Engineering Desk: https://www.demitechsolutions.com/contact
 
 ## Consultation & Commercial Services
-Demi Tech Solutions offers structured technical consultations:
-- Standard Remote Architectural Consultation: KES 2,500
-- Comprehensive On-Site Engineering Survey (Kisumu & Western Kenya): KES 5,000
+Demi Tech Solutions offers transparent technical consultations:
+- General initial project discussions & WhatsApp chats: Free of charge.
+- Structured Remote Architectural Consultation: KES 2,000
+- On-Site Technical Survey (Kisumu Area): KES 4,000
+- Regional Technical Survey (Western Kenya Corridor): KES 7,500
 
 ## Official Payment Methods
 ### 1. Automated M-Pesa STK Push (Lipa na M-Pesa Online)
